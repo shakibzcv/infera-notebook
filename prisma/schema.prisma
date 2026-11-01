@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+enum AllowedSourceType {
+  WEBSITE
+  YOUTUBE
+  APPLICATION_PDF
+  VIDEO_MP4
+  VIDEO_WEBM 
+  AUDIO_MP3
+  AUDIO_M4A
+  CSV
+  GITHUB
+  JSON
+  JSONLINES
+  TEXT
+  DOCX
+  EPUB
+  PPTX
+  SUBTITLES
+}
+
+
+enum AllowedNoteType {
+  CHAT_NOTE
+  EDITABLE_NOTE
+  AUDIO_OVERVIEW
+  VIDEO_OVERVIEW
+  MIND_MAP
+  FAQ
+  TIMELINE
+  BRIEFING_DOC
+  SLIDE_DECK
+  INFOGRAPHIC
+  QUIZ
+  FLASH_CARDS
+}
+
+enum Status {
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+enum MessageRole {
+  user
+  assistant
+}
+
+
+
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  credits       Int       @default(20)
+  lastCreditReset DateTime  @default(now())
+  notebooks     Notebook[]
+
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+
+
+
+
+model Notebook {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sources Source[]
+  notes Note[]
+  chats Chat[]
+  messages Message[]
+
+  @@index([userId])
+}
+
+
+model Source {
+  id String @id @default(uuid())
+  sourceTitle String
+  type AllowedSourceType 
+  notebookId String 
+  notebook Notebook @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  status Status @default(PROCESSING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fileId String @unique
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  notes Note[]
+
+  @@index([notebookId])
+}
+
+
+model File {
+  id          String   @id @default(uuid())
+  path        String
+  contentType String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  source      Source?
+}
+
+
+model Note {
+  id String @id @default(uuid())
+  noteTitle String
+  content String
+  type AllowedNoteType
+  notebookId String
+  notebook Notebook @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  status Status @default(PROCESSING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sources Source[]
+
+  @@index([notebookId])
+}
+
+
+model Chat {
+  id String @id @default(uuid())
+  notebookId String
+  notebook Notebook @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  title String @default("New Chat")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([notebookId])
+}
+
+
+model Message {
+  id String @id @default(uuid())
+  notebookId String 
+  notebook Notebook @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  chatId String?
+  chat Chat? @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role MessageRole @default(user)
+  parts Json[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([notebookId])
+  @@index([chatId])
+}
