@@ -72,6 +72,8 @@ export async function generateObject<T>(
   }
 
   const parsed = JSON.parse(response.text) as T;
-  console.log(`[Object Generation] Successfully generated structured object using model: "${model}"`);
+  console.log(
+    `[Object Generation] Successfully generated structured object using model: "${model}"`
+  );
   return parsed;
 }

@@ -120,9 +120,7 @@ export async function POST(
     const { sourceTitle, type, file } = bodyValidation.data;
 
     const isYouTube =
-      type === 'YOUTUBE' ||
-      file.path.includes('youtube.com') ||
-      file.path.includes('youtu.be');
+      type === 'YOUTUBE' || file.path.includes('youtube.com') || file.path.includes('youtu.be');
 
     if (isYouTube) {
       return NextResponse.json(

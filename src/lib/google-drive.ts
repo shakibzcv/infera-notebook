@@ -142,8 +142,7 @@ export function mapGoogleDriveMimeType(
     return {
       sourceType: 'DOCX',
       extension: 'docx',
-      contentType:
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     };
   }
 
@@ -156,8 +155,7 @@ export function mapGoogleDriveMimeType(
     return {
       sourceType: 'PPTX',
       extension: 'pptx',
-      contentType:
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     };
   }
 
@@ -326,7 +324,10 @@ export async function downloadGoogleDriveFile(options: {
         }
       }
     } catch (metaErr) {
-      console.warn('[GoogleDrive] Metadata lookup with token failed (falling back to direct download):', metaErr);
+      console.warn(
+        '[GoogleDrive] Metadata lookup with token failed (falling back to direct download):',
+        metaErr
+      );
     }
   }
 
@@ -336,9 +337,15 @@ export async function downloadGoogleDriveFile(options: {
   const publicUrlsToTry: string[] = [];
   if (resourceType === 'document' || mimeType === 'application/vnd.google-apps.document') {
     publicUrlsToTry.push(`https://docs.google.com/document/d/${fileId}/export?format=pdf`);
-  } else if (resourceType === 'spreadsheet' || mimeType === 'application/vnd.google-apps.spreadsheet') {
+  } else if (
+    resourceType === 'spreadsheet' ||
+    mimeType === 'application/vnd.google-apps.spreadsheet'
+  ) {
     publicUrlsToTry.push(`https://docs.google.com/spreadsheets/d/${fileId}/export?format=csv`);
-  } else if (resourceType === 'presentation' || mimeType === 'application/vnd.google-apps.presentation') {
+  } else if (
+    resourceType === 'presentation' ||
+    mimeType === 'application/vnd.google-apps.presentation'
+  ) {
     publicUrlsToTry.push(`https://docs.google.com/presentation/d/${fileId}/export/pdf`);
   } else {
     publicUrlsToTry.push(
@@ -414,7 +421,10 @@ export async function downloadGoogleDriveFile(options: {
     if (!resolvedTitle) {
       resolvedTitle = `Google-Drive-${fileId.slice(0, 8)}.${mapped.extension}`;
     } else if (!resolvedTitle.toLowerCase().endsWith(`.${mapped.extension}`)) {
-      if (mapped.sourceType === 'APPLICATION_PDF' && !resolvedTitle.toLowerCase().endsWith('.pdf')) {
+      if (
+        mapped.sourceType === 'APPLICATION_PDF' &&
+        !resolvedTitle.toLowerCase().endsWith('.pdf')
+      ) {
         resolvedTitle = `${resolvedTitle}.pdf`;
       } else if (mapped.sourceType === 'CSV' && !resolvedTitle.toLowerCase().endsWith('.csv')) {
         resolvedTitle = `${resolvedTitle}.csv`;
@@ -437,11 +447,17 @@ export async function downloadGoogleDriveFile(options: {
       apiDownloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`;
       if (!fileName) fileName = `Google-Doc-${fileId.slice(0, 8)}`;
       mimeType = 'application/vnd.google-apps.document';
-    } else if (resourceType === 'spreadsheet' || mimeType === 'application/vnd.google-apps.spreadsheet') {
+    } else if (
+      resourceType === 'spreadsheet' ||
+      mimeType === 'application/vnd.google-apps.spreadsheet'
+    ) {
       apiDownloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=text/csv`;
       if (!fileName) fileName = `Google-Sheet-${fileId.slice(0, 8)}`;
       mimeType = 'application/vnd.google-apps.spreadsheet';
-    } else if (resourceType === 'presentation' || mimeType === 'application/vnd.google-apps.presentation') {
+    } else if (
+      resourceType === 'presentation' ||
+      mimeType === 'application/vnd.google-apps.presentation'
+    ) {
       apiDownloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`;
       if (!fileName) fileName = `Google-Slide-${fileId.slice(0, 8)}`;
       mimeType = 'application/vnd.google-apps.presentation';
@@ -466,7 +482,10 @@ export async function downloadGoogleDriveFile(options: {
         if (!resolvedTitle) {
           resolvedTitle = `Google-Drive-${fileId.slice(0, 8)}.${mapped.extension}`;
         } else if (!resolvedTitle.toLowerCase().endsWith(`.${mapped.extension}`)) {
-          if (mapped.sourceType === 'APPLICATION_PDF' && !resolvedTitle.toLowerCase().endsWith('.pdf')) {
+          if (
+            mapped.sourceType === 'APPLICATION_PDF' &&
+            !resolvedTitle.toLowerCase().endsWith('.pdf')
+          ) {
             resolvedTitle = `${resolvedTitle}.pdf`;
           } else if (mapped.sourceType === 'CSV' && !resolvedTitle.toLowerCase().endsWith('.csv')) {
             resolvedTitle = `${resolvedTitle}.csv`;
@@ -525,7 +544,8 @@ export function isSupportedGoogleDriveItem(mimeType: string, fileName?: string):
 
   // PowerPoint
   if (
-    normalizedMime === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+    normalizedMime ===
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
     normalizedMime === 'application/vnd.ms-powerpoint' ||
     lowerName.endsWith('.pptx') ||
     lowerName.endsWith('.ppt')
@@ -588,11 +608,7 @@ export function isSupportedGoogleDriveItem(mimeType: string, fileName?: string):
   }
 
   // Subtitles
-  if (
-    normalizedMime === 'text/vtt' ||
-    lowerName.endsWith('.vtt') ||
-    lowerName.endsWith('.srt')
-  ) {
+  if (normalizedMime === 'text/vtt' || lowerName.endsWith('.vtt') || lowerName.endsWith('.srt')) {
     return true;
   }
 

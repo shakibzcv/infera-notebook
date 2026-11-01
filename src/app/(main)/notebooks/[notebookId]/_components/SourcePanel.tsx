@@ -155,7 +155,11 @@ function getDriveFileIcon(mimeType: string, isFolder?: boolean) {
   if (mimeType.includes('video')) {
     return <Video className="w-4 h-4 text-blue-400 shrink-0" />;
   }
-  if (mimeType.includes('json') || mimeType.includes('javascript') || mimeType.includes('typescript')) {
+  if (
+    mimeType.includes('json') ||
+    mimeType.includes('javascript') ||
+    mimeType.includes('typescript')
+  ) {
     return <Code2 className="w-4 h-4 text-cyan-500 shrink-0" />;
   }
   return <FileText className="w-4 h-4 text-muted-foreground shrink-0" />;
@@ -402,10 +406,7 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
       return;
     }
 
-    if (
-      trimmedUrl.includes('drive.google.com') ||
-      trimmedUrl.includes('docs.google.com')
-    ) {
+    if (trimmedUrl.includes('drive.google.com') || trimmedUrl.includes('docs.google.com')) {
       await handleDriveUrlSubmit(trimmedUrl);
       return;
     }
@@ -495,17 +496,14 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
     const toastId = toast.loading('Importing Google Drive source...');
 
     try {
-      const response = await fetch(
-        `/api/notebooks/${resolvedNotebookId}/sources/google-drive`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: targetUrl,
-            accessToken: googleDriveToken || undefined,
-          }),
-        }
-      );
+      const response = await fetch(`/api/notebooks/${resolvedNotebookId}/sources/google-drive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: targetUrl,
+          accessToken: googleDriveToken || undefined,
+        }),
+      });
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
@@ -525,10 +523,9 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
       setUrl('');
     } catch (err) {
       console.error(err);
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to import Google Drive source',
-        { id: toastId }
-      );
+      toast.error(err instanceof Error ? err.message : 'Failed to import Google Drive source', {
+        id: toastId,
+      });
     } finally {
       setIsGoogleDriveSubmitting(false);
     }
@@ -550,24 +547,19 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
     setIsGoogleDriveSubmitting(true);
     setModalOpen(false);
     setAddSourceMode('default');
-    const toastId = toast.loading(
-      `Importing ${driveFile.name.slice(0, 20)} from Google Drive...`
-    );
+    const toastId = toast.loading(`Importing ${driveFile.name.slice(0, 20)} from Google Drive...`);
 
     try {
-      const response = await fetch(
-        `/api/notebooks/${resolvedNotebookId}/sources/google-drive`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileId: driveFile.id,
-            fileName: driveFile.name,
-            mimeType: driveFile.mimeType,
-            accessToken: googleDriveToken || undefined,
-          }),
-        }
-      );
+      const response = await fetch(`/api/notebooks/${resolvedNotebookId}/sources/google-drive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileId: driveFile.id,
+          fileName: driveFile.name,
+          mimeType: driveFile.mimeType,
+          accessToken: googleDriveToken || undefined,
+        }),
+      });
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
@@ -585,10 +577,9 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
       toast.success(`Imported ${driveFile.name}`, { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to import Google Drive file',
-        { id: toastId }
-      );
+      toast.error(err instanceof Error ? err.message : 'Failed to import Google Drive file', {
+        id: toastId,
+      });
     } finally {
       setIsGoogleDriveSubmitting(false);
     }
@@ -597,11 +588,7 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
   /**
    * Lists files and folders from Google Drive within the current or target directory.
    */
-  const fetchDriveFiles = async (
-    token?: string | null,
-    search = '',
-    targetFolderId?: string
-  ) => {
+  const fetchDriveFiles = async (token?: string | null, search = '', targetFolderId?: string) => {
     if (!resolvedNotebookId) return;
     const effectiveToken = token || googleDriveToken;
     setIsLoadingDriveFiles(true);
@@ -635,8 +622,7 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
       setGoogleDriveFiles(data.files || []);
     } catch (err) {
       console.error('Error fetching Google Drive files:', err);
-      const errMsg =
-        err instanceof Error ? err.message : 'Failed to load Google Drive files';
+      const errMsg = err instanceof Error ? err.message : 'Failed to load Google Drive files';
       setDriveError(errMsg);
     } finally {
       setIsLoadingDriveFiles(false);
@@ -1702,7 +1688,8 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
                                 Browse Your Google Drive
                               </h4>
                               <p className="text-xs text-muted-foreground">
-                                Select Google Docs, Sheets, Slides, or files directly from your account
+                                Select Google Docs, Sheets, Slides, or files directly from your
+                                account
                               </p>
                             </div>
                           </div>
@@ -1766,7 +1753,10 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
                                   {folderStack.map((f, idx) => {
                                     const isCurrent = idx === folderStack.length - 1;
                                     return (
-                                      <div key={f.id} className="flex items-center gap-1.5 shrink-0">
+                                      <div
+                                        key={f.id}
+                                        className="flex items-center gap-1.5 shrink-0"
+                                      >
                                         {idx > 0 && (
                                           <ChevronRight className="size-3 text-muted-foreground/60 shrink-0" />
                                         )}
@@ -1813,7 +1803,9 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
                                 {isLoadingDriveFiles ? (
                                   <div className="p-6 flex flex-col items-center justify-center text-muted-foreground gap-2">
                                     <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                                    <span className="text-xs">Loading Google Drive contents...</span>
+                                    <span className="text-xs">
+                                      Loading Google Drive contents...
+                                    </span>
                                   </div>
                                 ) : driveError ? (
                                   <div className="p-6 text-center flex flex-col items-center gap-3">
@@ -2010,7 +2002,8 @@ export function SourcePanel({ className = '', notebookId }: SourcePanelProps) {
                           <GoogleDriveIcon className="size-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Supports Google Docs, Google Sheets, Google Slides, PDFs, Word docs, Audio, Video, and more.
+                          Supports Google Docs, Google Sheets, Google Slides, PDFs, Word docs,
+                          Audio, Video, and more.
                         </p>
                       </div>
 

@@ -158,8 +158,7 @@ export async function POST(
     return NextResponse.json({ source }, { status: 201 });
   } catch (error) {
     console.error('[IMPORT_GOOGLE_DRIVE_SOURCE]', error);
-    const message =
-      error instanceof Error ? error.message : 'Failed to import Google Drive file';
+    const message = error instanceof Error ? error.message : 'Failed to import Google Drive file';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

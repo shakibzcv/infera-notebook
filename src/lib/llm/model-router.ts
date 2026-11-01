@@ -33,26 +33,19 @@ export type TitleRouterModel = (typeof TITLE_ROUTER_MODELS)[number];
 /**
  * Text-to-Speech (TTS) Models
  */
-export const TTS_ROUTER_MODELS = [
-  'gemini-3.8-flash-tts',
-  'gemini-3.8-flash-lite-tts',
-] as const;
+export const TTS_ROUTER_MODELS = ['gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts'] as const;
 export type TTSRouterModel = (typeof TTS_ROUTER_MODELS)[number];
 
 /**
  * Gemini Live API Models
  */
-export const LIVE_ROUTER_MODELS = [
-  'gemini-3.8-live',
-] as const;
+export const LIVE_ROUTER_MODELS = ['gemini-3.8-live'] as const;
 export type LiveRouterModel = (typeof LIVE_ROUTER_MODELS)[number];
 
 /**
  * Embedding Models
  */
-export const EMBEDDING_ROUTER_MODELS = [
-  'gemini-embedding-2',
-] as const;
+export const EMBEDDING_ROUTER_MODELS = ['gemini-embedding-2'] as const;
 export type EmbeddingRouterModel = (typeof EMBEDDING_ROUTER_MODELS)[number];
 
 // ============================================================================

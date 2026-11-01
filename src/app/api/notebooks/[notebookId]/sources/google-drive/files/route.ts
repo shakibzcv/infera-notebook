@@ -62,8 +62,7 @@ export async function GET(
         error.message.toLowerCase().includes('invalid_grant') ||
         error.message.toLowerCase().includes('invalid credentials'));
 
-    const message =
-      error instanceof Error ? error.message : 'Failed to list Google Drive files';
+    const message = error instanceof Error ? error.message : 'Failed to list Google Drive files';
 
     return NextResponse.json(
       {
