@@ -1,0 +1,39 @@
+# Dependency directories
+node_modules/
+bun.lockb
+bun.lock
+
+# Build outputs
+.next/
+dist/
+build/
+.cache/
+
+# Environment variables
+.env*
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Prisma
+prisma/generated/
+generated/
+
+# Public assets
+public/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
