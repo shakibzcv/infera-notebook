@@ -1,0 +1,21 @@
+{
+  "name": "Infera Notebook",
+  "short_name": "Infera",
+  "description": "AI-Powered Notes & Podcast Generator. Upload documents, chat with your files, and instantly generate insightful notes.",
+  "icons": [
+    {
+      "src": "/favicon_io/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon_io/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#232a55",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
