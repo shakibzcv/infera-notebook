@@ -8,6 +8,11 @@ export type SourceVectorizer = (url: string) => Promise<Document[]>;
  */
 export async function fetchSource(url: string): Promise<Blob> {
   const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch source from ${url}: ${response.status} ${response.statusText}`
+    );
+  }
   const data = await response.arrayBuffer();
   return new Blob([data]);
 }
