@@ -1,10 +1,11 @@
 import Firecrawl from '@mendable/firecrawl-js';
+import { FIRECRAWL_API_KEY } from '@/lib/env';
 import type { Document } from '@langchain/core/documents';
 
 export async function websiteToVector(url: string): Promise<Document[]> {
   try {
     const firecrawl = new Firecrawl({
-      apiKey: process.env.FIRECRAWL_API_KEY,
+      apiKey: FIRECRAWL_API_KEY,
     });
 
     // Use scrapeUrl (v0/v1) as per our successful test

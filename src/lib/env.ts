@@ -13,6 +13,8 @@ export const envSchema = z.object({
   PINECONE_INDEX: z.string().min(1).optional(),
   AWS_S3_BUCKET_NAME: z.string().min(1).optional(),
   BETTER_AUTH_SECRET: z.string().min(1).optional(),
+  FIRECRAWL_API_KEY: z.string().min(1).optional(),
+  TAVILY_API_KEY: z.string().min(1).optional(),
 });
 
 /**
@@ -71,6 +73,8 @@ export const AWS_FORCE_PATH_STYLE =
 // --- SEARCH TOOLS & SCRAPERS ---
 /** Tavily search API key for web-aware AI capabilities */
 export const TAVILY_API_KEY = process.env.TAVILY_API_KEY || '';
+/** Firecrawl API key for scraping websites into markdown */
+export const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY || '';
 
 // --- AUTH ---
 export const BETTER_AUTH_SECRET =
