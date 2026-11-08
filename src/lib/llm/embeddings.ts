@@ -6,7 +6,6 @@ import {
 } from '@/lib/constants';
 import { GoogleGenAI } from '@google/genai';
 import { GEMINI_API_KEY } from './config';
-import { EMBEDDING_ROUTER_MODELS } from './model-router';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -200,8 +199,7 @@ async function embedSingleWithRetry(
  * Gemini Embedding - Query (Asymmetric)
  * Uses the 'task: search result | query: ...' format for Gemini embeddings.
  */
-export async function embedQuery(text: string, models?: readonly string[]): Promise<number[]> {
-  const model = models?.[0] || EMBEDDING_MODEL_ID;
+export async function embedQuery(text: string, model: string = EMBEDDING_MODEL_ID): Promise<number[]> {
   const query = `task: search result | query: ${text}`;
   return embedSingleWithRetry(query, model);
 }
@@ -213,9 +211,8 @@ export async function embedQuery(text: string, models?: readonly string[]): Prom
  */
 export async function embedDocuments(
   texts: string[],
-  models?: readonly string[]
+  model: string = EMBEDDING_MODEL_ID
 ): Promise<number[][]> {
-  const model = models?.[0] || EMBEDDING_MODEL_ID;
   const batchSize = GEMINI_EMBEDDING_BATCH_SIZE;
   const results: number[][] = [];
 

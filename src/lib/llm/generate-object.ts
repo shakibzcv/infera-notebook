@@ -1,12 +1,11 @@
 import { GoogleGenAI } from '@google/genai';
-import { DEFAULT_MODEL } from './model-router';
+import { DEFAULT_MODEL } from './models';
 import { GenerateObjectOptions } from '@/types/ai';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from 'zod';
 
 /**
- * Structured JSON Generation using single model (Gemini 3.5 Flash Lite).
- * Multi-model routing and fallback chains have been removed.
+ * Structured JSON Generation using Gemini.
  */
 export async function generateObject<T>(
   options: GenerateObjectOptions,
@@ -14,7 +13,7 @@ export async function generateObject<T>(
 ): Promise<T> {
   const { messages, outputSchema, temperature } = options;
   const { apiKey } = config;
-  const model = options.model || (options.models && options.models[0]) || DEFAULT_MODEL;
+  const model = options.model || DEFAULT_MODEL;
 
   const ai = new GoogleGenAI({ apiKey });
 

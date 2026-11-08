@@ -44,14 +44,12 @@ Upload and index virtually any knowledge format:
 - **Web & Code**: Web URLs (via Tavily Extract), YouTube videos (automated transcript extraction), GitHub repositories
 - **Subtitles**: SubRip subtitle files (`.srt`)
 
-### 🧠 Dynamic AI Model Router & Multi-Tier Fallback
+### 🧠 Direct AI Intelligence Architecture
 
-An intelligent, bounded syntax-based task classifier that dynamically directs prompts through specialized fallback chains with automatic in-memory cooldown:
+Direct, reliable single-model execution without complex routing layers or failure fallbacks:
 
-- **Flagship Reasoning**: Gemini 3.8 Flash & Gemini 3.6 Flash for deep synthesis, complex analysis, and structured outputs
-- **High-Throughput Chat**: Gemini 3.5 Flash-Lite & Gemini 3.1 Flash-Lite (up to 500 RPD) for responsive streaming conversations
-- **Quota Workhorses**: Gemma 4 (26B & 31B) for high-frequency operations like title generation (14,400 RPD)
-- **Multi-Speaker TTS**: Gemini 2.5 Flash Preview TTS and Gemini 3.1 Flash TTS Preview with structured multi-speaker dialogue turns and voice configs
+- **Flagship Reasoning & Chat**: Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`) for all conversational chat, streaming, reasoning, note synthesis, and transcription
+- **Multi-Speaker TTS**: Gemini 2.5 Flash Preview TTS (`gemini-2.5-flash-preview-tts`) with structured multi-speaker dialogue turns and voice configs
 - **Multimodal Vector Embeddings**: Google `gemini-embedding-2` with 768-dimensional Matryoshka Representation Learning (MRL), batched with rate-limit backoff
 
 ### 🎙️ Real-Time Voice Agent & Gemini Live API
@@ -181,7 +179,7 @@ infera-notebook/
 │   │   ├── credits.ts          # Credit deduction and daily quota reset logic
 │   │   ├── env.ts              # Centralized environment variable validation
 │   │   ├── llm/                # Model routing, streaming, and LLM integrations
-│   │   │   ├── model-router.ts # Dynamic task classifier & multi-tier fallback chains
+│   │   │   ├── models.ts       # Model constants & core LLM helpers
 │   │   │   ├── stream-text.ts  # Token-by-token streaming implementation
 │   │   │   ├── live-api-client.ts # Gemini Live WebSocket client
 │   │   │   └── generate-tts.ts # Multi-speaker TTS generator

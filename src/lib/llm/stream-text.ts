@@ -1,4 +1,4 @@
-import { DEFAULT_MODEL, isAbortError, isGemini3OrNewer } from './model-router';
+import { DEFAULT_MODEL, isAbortError, isGemini3OrNewer } from './models';
 import { StreamTextOptions } from '@/types/ai';
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -7,12 +7,11 @@ import { createTools } from './tools';
 
 /**
  * SSE Text Streaming with Multi-turn Chat, Multimodal support, and Zod Tools.
- * Uses a single unified model (Gemini 3.5 Flash Lite) without fallback routing.
  */
 export async function streamText(options: StreamTextOptions, config: { apiKey: string }) {
   const { messages, context, onFinish, abortSignal } = options;
   const { apiKey } = config;
-  const model = options.model || (options.models && options.models[0]) || DEFAULT_MODEL;
+  const model = options.model || DEFAULT_MODEL;
 
   const ai = new GoogleGenAI({ apiKey });
   const toolHandlers = context ? createTools(context) : {};

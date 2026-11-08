@@ -49,9 +49,7 @@ flowchart TD
 
     %% AI and Speech
     subgraph AI["AI & Speech Intelligence"]
-        ModelRouter["Dynamic Task Classifier & Model Router"]
-        GeminiFlash["Gemini Flash Models"]
-        Gemma["Gemma Workhorse Models"]
+        GeminiModel["Gemini 3.5 Flash Lite Engine"]
         Embeddings["Gemini Embeddings - 768d"]
         DeepgramASR["Deepgram Flux ASR / Nova-3 STT"]
         DeepgramTTS["Deepgram Aura-2 TTS"]
@@ -79,7 +77,7 @@ flowchart TD
     CreditService --> Postgres
     ChatAPI --> Postgres
     ChatAPI --> Pinecone
-    ChatAPI --> ModelRouter
+    ChatAPI --> GeminiModel
     SourceAPI --> Postgres
     SourceAPI --> InngestBus
     S3API --> BlobStorage
@@ -98,14 +96,12 @@ flowchart TD
     InngestBus --> WorkerNote
     WorkerNote --> TextCache
     WorkerNote --> Pinecone
-    WorkerNote --> ModelRouter
+    WorkerNote --> GeminiModel
     WorkerNote --> Postgres
     WorkerNote --> RealtimePubSub
 
-    %% AI routing
-    ModelRouter --> GeminiFlash
-    ModelRouter --> Gemma
-    VoiceAPI --> ModelRouter
+    %% AI execution
+    VoiceAPI --> GeminiModel
     VoiceAPI --> DeepgramTTS
 
     %% Voice processing
@@ -185,7 +181,7 @@ sequenceDiagram
 The AI layer is structured around specialized Google Gemini models:
 
 1. **Unified Text & Synthesis Engine**: All conversational chat, streaming, reasoning, structured note synthesis, title generation, and transcription use **Gemini 3.5 Flash Lite** (`gemini-3.5-flash-lite`) for fast, consistent execution and high-fidelity output.
-2. **Multi-Speaker TTS Engine**: Multi-speaker podcast synthesis uses a specialized fallback router (`gemini-2.5-flash-preview-tts` → `gemini-3.1-flash-tts-preview`). The generator structures conversational script turns as discrete content parts with `speech_metadata.speaker` annotations paired with `speechConfig.multiSpeakerVoiceConfig.speakerVoiceConfigs` (e.g., `Puck` and `Charon`), ensuring distinct, realistic studio host voices.
+2. **Multi-Speaker TTS Engine**: Multi-speaker podcast synthesis uses **Gemini 2.5 Flash Preview TTS** (`gemini-2.5-flash-preview-tts`). The generator structures conversational script turns as discrete content parts with `speech_metadata.speaker` annotations paired with `speechConfig.multiSpeakerVoiceConfig.speakerVoiceConfigs` (e.g., `Puck` and `Charon`), ensuring distinct, realistic studio host voices.
 3. **Batched Embeddings**: Google `gemini-embedding-2` produces 768-dimensional Matryoshka Representation Learning (MRL) embeddings. Ingestion batches calls (up to 96 documents per request) with exponential backoff to respect the 100 RPM limit.
 
 ```mermaid
@@ -193,8 +189,7 @@ flowchart TD
     Prompt["Incoming Text / Chat / Note Task"] --> Model["Gemini 3.5 Flash Lite (gemini-3.5-flash-lite)"]
     Model --> Output["Generated Output (Chat, Structured Notes, Titles, Transcription)"]
 
-    TTSPrompt["Audio Overview Script (Dialogue Turns)"] --> TTSRouter["TTS Model Router (gemini-2.5-flash-preview-tts)"]
-    TTSRouter --> MultiSpeakerTTS["Google Gemini Multi-Speaker Speech Engine"]
+    TTSPrompt["Audio Overview Script (Dialogue Turns)"] --> MultiSpeakerTTS["Google Gemini Multi-Speaker Speech Engine (gemini-2.5-flash-preview-tts)"]
     MultiSpeakerTTS --> AudioOutput["WAV/MP3 Podcast Stream (Puck & Charon)"]
 ```
 
@@ -297,7 +292,7 @@ sequenceDiagram
     participant Auth as Session and credit check
     participant Embed as Gemini embedding (768d)
     participant Pinecone as Pinecone vector store
-    participant Router as Model router
+    participant LLM as Gemini 3.5 Flash Lite
     participant DB as PostgreSQL
 
     User->>ChatUI: Submit question
@@ -306,8 +301,8 @@ sequenceDiagram
     Route->>Embed: Embed user query
     Route->>Pinecone: Query relevant vectors
     Pinecone-->>Route: Return relevant document chunks
-    Route->>Router: Construct grounded prompt
-    Router-->>ChatUI: Stream response with citations
+    Route->>LLM: Construct grounded prompt
+    LLM-->>ChatUI: Stream response with citations
     Route->>DB: Persist user and assistant messages
 ```
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { GEMINI_API_KEY } from '@/lib/llm/config';
-import { DEFAULT_MODEL } from '@/lib/llm/model-router';
+import { DEFAULT_MODEL } from '@/lib/llm/models';
 
 export async function POST(req: Request) {
   const google = new GoogleGenAI({ apiKey: GEMINI_API_KEY });

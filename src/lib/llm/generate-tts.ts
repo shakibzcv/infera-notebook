@@ -1,10 +1,11 @@
 import { GoogleGenAI } from '@google/genai';
 import { GEMINI_API_KEY } from './config';
-import { TTS_ROUTER_MODELS, type TTSRouterModel } from './model-router';
+import { DEFAULT_TTS_MODEL } from './models';
 
 export interface TTSOptions {
   text?: string;
   voice?: string;
+  model?: string;
   multiSpeaker?: {
     speakers: { name: string; voice: string }[];
     turns?: { speaker: string; text: string }[];
@@ -15,7 +16,7 @@ export interface TTSResult {
   success: boolean;
   buffer?: Buffer;
   error?: string;
-  modelUsed?: TTSRouterModel;
+  modelUsed?: string;
 }
 
 /**
@@ -88,11 +89,10 @@ function parseTextToTurns(
 }
 
 /**
- * Gemini Text-to-Speech (TTS) Generation with Model Router Fallback
- * Cascades across TTS_ROUTER_MODELS to maximize rate limits and handle multi-speaker dialogues.
+ * Gemini Text-to-Speech (TTS) Generation using direct model execution.
  */
 export async function generateTTS(options: TTSOptions): Promise<TTSResult> {
-  const { text = '', voice = 'Zephyr', multiSpeaker } = options;
+  const { text = '', voice = 'Zephyr', model = DEFAULT_TTS_MODEL, multiSpeaker } = options;
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
   const isMulti = Boolean(
@@ -154,42 +154,37 @@ export async function generateTTS(options: TTSOptions): Promise<TTSResult> {
     };
   }
 
-  let lastError = 'No models available';
+  try {
+    console.log(`[TTS] Generating audio with model: "${model}" (multiSpeaker: ${isMulti})`);
 
-  for (const model of TTS_ROUTER_MODELS) {
-    try {
-      console.log(`[TTS] Generating audio with model: "${model}" (multiSpeaker: ${isMulti})`);
+    const response = await ai.models.generateContent({
+      model,
+      contents: [{ parts }],
+      config,
+    });
 
-      const response = await ai.models.generateContent({
-        model,
-        contents: [{ parts }],
-        config,
-      });
+    const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
-      const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-
-      if (!data) {
-        const finishReason = response.candidates?.[0]?.finishReason;
-        if (finishReason === 'SAFETY') {
-          throw new Error('TTS generation blocked by safety filters.');
-        }
-        throw new Error(`No audio data returned from model "${model}".`);
+    if (!data) {
+      const finishReason = response.candidates?.[0]?.finishReason;
+      if (finishReason === 'SAFETY') {
+        throw new Error('TTS generation blocked by safety filters.');
       }
-
-      const pcmBuffer = Buffer.from(data, 'base64');
-      const wavBuffer = addWavHeader(pcmBuffer);
-
-      console.log(`[TTS] Successfully generated audio using model: "${model}"`);
-      return { success: true, buffer: wavBuffer, modelUsed: model };
-    } catch (error: any) {
-      lastError = error?.message || String(error);
-      console.warn(`[TTS] Model "${model}" failed, falling back if available:`, lastError);
+      throw new Error(`No audio data returned from model "${model}".`);
     }
-  }
 
-  console.error('[TTS] All router models exhausted:', lastError);
-  return {
-    success: false,
-    error: lastError,
-  };
+    const pcmBuffer = Buffer.from(data, 'base64');
+    const wavBuffer = addWavHeader(pcmBuffer);
+
+    console.log(`[TTS] Successfully generated audio using model: "${model}"`);
+    return { success: true, buffer: wavBuffer, modelUsed: model };
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error);
+    console.error(`[TTS] Generation failed using model "${model}":`, errorMsg);
+    return {
+      success: false,
+      error: errorMsg,
+      modelUsed: model,
+    };
+  }
 }

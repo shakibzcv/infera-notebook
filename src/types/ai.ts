@@ -2,8 +2,6 @@
  * AI Service Specific Types & Interfaces
  */
 
-export type ModelTaskType = 'title' | 'complex' | 'chat' | 'structured_note';
-
 export interface StreamTextOptions {
   messages: any[];
   context?: ToolContext;
@@ -13,9 +11,7 @@ export interface StreamTextOptions {
     toolInvocations: any[];
   }) => Promise<void>;
   abortSignal?: AbortSignal;
-  taskType?: ModelTaskType;
   model?: string;
-  models?: readonly string[];
 }
 
 export interface GenerateTextOptions {
@@ -24,8 +20,6 @@ export interface GenerateTextOptions {
   max_tokens?: number;
   notebookId?: string;
   model?: string;
-  models?: readonly string[];
-  taskType?: ModelTaskType;
 }
 
 export interface GenerateObjectOptions {
@@ -34,9 +28,7 @@ export interface GenerateObjectOptions {
   temperature?: number;
   notebookId?: string;
   objectName?: string;
-  taskType?: ModelTaskType;
   model?: string;
-  models?: readonly string[];
 }
 
 import { z } from 'zod';

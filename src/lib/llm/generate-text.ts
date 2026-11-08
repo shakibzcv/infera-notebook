@@ -1,10 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
-import { DEFAULT_MODEL } from './model-router';
+import { DEFAULT_MODEL } from './models';
 import { GenerateTextOptions } from '@/types/ai';
 
 /**
- * Text Generation using single model (Gemini 3.5 Flash Lite).
- * Multi-model routing and fallback chains have been removed.
+ * Text Generation using Gemini.
  */
 export async function generateText(
   options: GenerateTextOptions,
@@ -12,7 +11,7 @@ export async function generateText(
 ): Promise<string> {
   const { messages, temperature } = options;
   const { apiKey } = config;
-  const model = options.model || (options.models && options.models[0]) || DEFAULT_MODEL;
+  const model = options.model || DEFAULT_MODEL;
 
   const ai = new GoogleGenAI({ apiKey });
   const systemInstruction = messages.find((m: any) => m.role === 'system')?.content;

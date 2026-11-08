@@ -4,6 +4,8 @@ import { AllowedSourceType, AllowedNoteType } from '@/generated/prisma/enums';
 export const EMBEDDING_MODEL_ID = 'gemini-embedding-2';
 export const GEMINI_EMBEDDING_DIMENSIONALITY = 768;
 export const TTS_MODEL_ID = 'aura-2-en';
+export const GEMINI_TTS_MODEL_ID = 'gemini-2.5-flash-preview-tts';
+export const GEMINI_LIVE_MODEL_ID = 'gemini-3.8-live';
 export const TRANSCRIPTION_MODEL_ID = 'nova-3';
 export const IMAGE_MODEL_ID = 'gemini-2.5-flash-image';
 export const CHAT_MODEL_ID = 'gemini-3.5-flash-lite';

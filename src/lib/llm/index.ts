@@ -1,5 +1,5 @@
 export * from './config';
-export * from './model-router';
+export * from './models';
 export * from './stream-text';
 export * from './generate-text';
 export * from './generate-object';
