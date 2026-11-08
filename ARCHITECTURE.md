@@ -226,20 +226,20 @@ flowchart LR
 
 Note creation actions are organized in the workspace into quick-access buttons (Study Guide, Audio Overview, Mind Map) and an extensible **Report** dropdown menu:
 
-| Note Type        | UI Menu Placement         | Handler or Implementation      | Generation Output                                 |
-| ---------------- | ------------------------- | ------------------------------ | ------------------------------------------------- |
-| `EDITABLE_NOTE`  | Top-level / Convert       | User-created or converted      | BlockNote block JSON                              |
-| `CHAT_NOTE`      | Chat action               | `/api/chat` save action        | Markdown conversation record                      |
-| `AUDIO_OVERVIEW` | Quick Action              | `src/lib/notes/audio-overview` | Dialogue script and multi-speaker TTS audio       |
-| `MIND_MAP`       | Quick Action              | `src/lib/notes/mindmap`        | XYFlow graph specification                        |
-| `FAQ`            | Report Menu               | `src/lib/notes/faq`            | Questions, answers, and categories                |
-| `TIMELINE`       | Report Menu               | `src/lib/notes/timeline`       | Dates, titles, and descriptions                   |
-| `BRIEFING_DOC`   | Report Menu               | `src/lib/notes/briefing`       | Executive summary, findings, and recommendations  |
-| `QUIZ`           | Quick Action (Study)      | `src/lib/notes/quiz`           | Questions, options, answers, and explanations     |
-| `FLASH_CARDS`    | Quick Action (Study)      | `src/lib/notes/flash-cards`    | Front, back, and category fields                  |
-| `SLIDE_DECK`     | Report Menu *(Coming Soon)* | `src/lib/notes/slide-deck`   | Slides, bullets, and speaker notes                |
-| `INFOGRAPHIC`    | Report Menu *(Coming Soon)* | `src/lib/notes/infographic`  | Data sections, metrics, and visual hierarchy      |
-| `VIDEO_OVERVIEW` | Report Menu *(Coming Soon)* | `src/lib/notes/video-overview` | Synchronized slides, audio, and Remotion metadata |
+| Note Type        | UI Menu Placement           | Handler or Implementation      | Generation Output                                 |
+| ---------------- | --------------------------- | ------------------------------ | ------------------------------------------------- |
+| `EDITABLE_NOTE`  | Top-level / Convert         | User-created or converted      | BlockNote block JSON                              |
+| `CHAT_NOTE`      | Chat action                 | `/api/chat` save action        | Markdown conversation record                      |
+| `AUDIO_OVERVIEW` | Quick Action                | `src/lib/notes/audio-overview` | Dialogue script and multi-speaker TTS audio       |
+| `MIND_MAP`       | Quick Action                | `src/lib/notes/mindmap`        | XYFlow graph specification                        |
+| `FAQ`            | Report Menu                 | `src/lib/notes/faq`            | Questions, answers, and categories                |
+| `TIMELINE`       | Report Menu                 | `src/lib/notes/timeline`       | Dates, titles, and descriptions                   |
+| `BRIEFING_DOC`   | Report Menu                 | `src/lib/notes/briefing`       | Executive summary, findings, and recommendations  |
+| `QUIZ`           | Quick Action (Study)        | `src/lib/notes/quiz`           | Questions, options, answers, and explanations     |
+| `FLASH_CARDS`    | Quick Action (Study)        | `src/lib/notes/flash-cards`    | Front, back, and category fields                  |
+| `SLIDE_DECK`     | Report Menu _(Coming Soon)_ | `src/lib/notes/slide-deck`     | Slides, bullets, and speaker notes                |
+| `INFOGRAPHIC`    | Report Menu _(Coming Soon)_ | `src/lib/notes/infographic`    | Data sections, metrics, and visual hierarchy      |
+| `VIDEO_OVERVIEW` | Report Menu _(Coming Soon)_ | `src/lib/notes/video-overview` | Synchronized slides, audio, and Remotion metadata |
 
 ---
 

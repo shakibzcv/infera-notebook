@@ -234,12 +234,7 @@ export function useMultibandVolume(
 }
 
 type AnimationState =
-  | 'connecting'
-  | 'initializing'
-  | 'listening'
-  | 'speaking'
-  | 'thinking'
-  | undefined;
+  'connecting' | 'initializing' | 'listening' | 'speaking' | 'thinking' | undefined;
 
 export const useBarAnimator = (
   state: AnimationState,

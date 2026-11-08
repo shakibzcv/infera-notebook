@@ -76,9 +76,9 @@ Generate studio-grade summaries, study materials, and interactive media from you
 | **📊 Briefing Docs**   | Executive-ready research summaries, key findings, and decision briefs                 | Structured JSON                         |
 | **🧠 Quizzes**         | Interactive knowledge assessments with instant scoring and explanations               | Structured JSON                         |
 | **🎴 Flash Cards**     | Interactive double-sided study cards for active recall and spaced repetition          | Structured JSON                         |
-| **📽️ Slide Decks**     | Presentation decks complete with titles, bullets, and speaker notes *(Coming Soon)*   | Structured JSON                         |
-| **📈 Infographics**    | Visually categorized statistical, thematic, and hierarchical cards *(Coming Soon)*    | Structured JSON                         |
-| **🎬 Video Overviews** | Synchronized video recaps with animated slides and audio *(Coming Soon)*              | [Remotion](https://www.remotion.dev/)   |
+| **📽️ Slide Decks**     | Presentation decks complete with titles, bullets, and speaker notes _(Coming Soon)_   | Structured JSON                         |
+| **📈 Infographics**    | Visually categorized statistical, thematic, and hierarchical cards _(Coming Soon)_    | Structured JSON                         |
+| **🎬 Video Overviews** | Synchronized video recaps with animated slides and audio _(Coming Soon)_              | [Remotion](https://www.remotion.dev/)   |
 
 ### 🔍 Production-Grade RAG Architecture
 
@@ -301,22 +301,22 @@ AWS_S3_BUCKET_NAME=infera-notebook
 
 ## 📖 Available Scripts
 
-| Command                    | Purpose                                                            |
-| -------------------------- | ------------------------------------------------------------------ |
-| `pnpm run dev`             | Start the Next.js local development server                         |
-| `pnpm run inngest:dev`     | Start the local Inngest dev server on port 8288 (`inngest dev`)    |
-| `pnpm run build`           | Build the production application bundle                            |
-| `pnpm run start`           | Run the Next.js production server                                  |
-| `pnpm run lint`            | Run ESLint checks across the codebase                              |
-| `pnpm run typecheck`       | Validate TypeScript types with `tsc --noEmit`                      |
-| `pnpm run format`          | Auto-format codebase using Prettier                                |
-| `pnpm run format:check`    | Verify formatting consistency with Prettier                        |
-| `pnpm run db:generate`     | Generate the Prisma client into `src/generated/prisma`             |
-| `pnpm run db:migrate`      | Execute database migrations in development mode                    |
-| `pnpm run db:studio`       | Launch Prisma Studio UI for database inspection                    |
-| `pnpm run db:reset`        | Reset the database and re-apply all migrations                     |
-| `pnpm run bucket:setup`    | Create S3/R2 bucket and apply CORS configuration                   |
-| `pnpm run bucket:teardown` | Delete S3/R2 bucket and clean up storage assets                    |
+| Command                    | Purpose                                                                                  |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| `pnpm run dev`             | Start the Next.js local development server                                               |
+| `pnpm run inngest:dev`     | Start the local Inngest dev server on port 8288 (`inngest dev`)                          |
+| `pnpm run build`           | Build the production application bundle                                                  |
+| `pnpm run start`           | Run the Next.js production server                                                        |
+| `pnpm run lint`            | Run ESLint checks across the codebase                                                    |
+| `pnpm run typecheck`       | Validate TypeScript types with `tsc --noEmit`                                            |
+| `pnpm run format`          | Auto-format codebase using Prettier                                                      |
+| `pnpm run format:check`    | Verify formatting consistency with Prettier                                              |
+| `pnpm run db:generate`     | Generate the Prisma client into `src/generated/prisma`                                   |
+| `pnpm run db:migrate`      | Execute database migrations in development mode                                          |
+| `pnpm run db:studio`       | Launch Prisma Studio UI for database inspection                                          |
+| `pnpm run db:reset`        | Reset the database and re-apply all migrations                                           |
+| `pnpm run bucket:setup`    | Create S3/R2 bucket and apply CORS configuration                                         |
+| `pnpm run bucket:teardown` | Delete S3/R2 bucket and clean up storage assets                                          |
 | `pnpm run pinecone:reset`  | Wipe all documents and namespaces from the configured Pinecone index using Documents API |
 
 ---

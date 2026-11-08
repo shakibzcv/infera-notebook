@@ -633,7 +633,8 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
-                    This feature is currently under active development. You are previewing an early prototype.
+                    This feature is currently under active development. You are previewing an early
+                    prototype.
                   </p>
                 </div>
               ) : currentNoteConfig?.beta ? (

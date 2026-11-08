@@ -95,7 +95,9 @@ export async function generateTTS(options: TTSOptions): Promise<TTSResult> {
   const { text = '', voice = 'Zephyr', multiSpeaker } = options;
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-  const isMulti = Boolean(multiSpeaker && multiSpeaker.speakers && multiSpeaker.speakers.length > 0);
+  const isMulti = Boolean(
+    multiSpeaker && multiSpeaker.speakers && multiSpeaker.speakers.length > 0
+  );
 
   let parts: any[] = [];
   const config: any = {

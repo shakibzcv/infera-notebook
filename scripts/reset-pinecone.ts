@@ -48,7 +48,7 @@ async function resetPinecone() {
       console.log(`Found namespaces: ${Object.keys(stats.namespaces).join(', ')}`);
       for (const [ns, nsInfo] of Object.entries(stats.namespaces)) {
         console.log(`Clearing namespace "${ns}" (${nsInfo.recordCount ?? 0} records)...`);
-        
+
         let cleared = false;
 
         // Try Documents API (2026-07) first for document-schema indices

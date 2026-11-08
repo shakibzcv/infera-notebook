@@ -102,7 +102,15 @@ export async function searchDocuments(
   const body: Record<string, any> = {
     top_k: topK,
     score_by: [{ type: 'embed', field: 'chunk_text', query }],
-    include_fields: ['chunk_text', 'title', 'sourceId', 'notebookId', 'userId', 'chunkIndex', 'fileType'],
+    include_fields: [
+      'chunk_text',
+      'title',
+      'sourceId',
+      'notebookId',
+      'userId',
+      'chunkIndex',
+      'fileType',
+    ],
   };
 
   if (filter) {

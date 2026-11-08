@@ -202,9 +202,8 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
               >
                 {(segment, idx) => {
                   const speaker =
-                    parsed.participants?.find(
-                      (p: any) => p.voice === (segment as any).voice
-                    ) || parsed.participants?.[idx % (parsed.participants?.length || 1)];
+                    parsed.participants?.find((p: any) => p.voice === (segment as any).voice) ||
+                    parsed.participants?.[idx % (parsed.participants?.length || 1)];
                   const speakerName = speaker?.name || `Speaker ${idx + 1}`;
 
                   return (

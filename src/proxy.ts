@@ -15,10 +15,7 @@ export const publicRoutes = ['/', '/api/inngest'];
  * These routes will redirect logged in users to /
  * @type {string[]}
  */
-export const authRoutes = [
-  '/sign-in',
-  '/sign-up',
-];
+export const authRoutes = ['/sign-in', '/sign-up'];
 
 /**
  * The prefix for API authentication routes
