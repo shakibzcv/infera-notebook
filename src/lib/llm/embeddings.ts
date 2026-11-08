@@ -199,7 +199,10 @@ async function embedSingleWithRetry(
  * Gemini Embedding - Query (Asymmetric)
  * Uses the 'task: search result | query: ...' format for Gemini embeddings.
  */
-export async function embedQuery(text: string, model: string = EMBEDDING_MODEL_ID): Promise<number[]> {
+export async function embedQuery(
+  text: string,
+  model: string = EMBEDDING_MODEL_ID
+): Promise<number[]> {
   const query = `task: search result | query: ${text}`;
   return embedSingleWithRetry(query, model);
 }
