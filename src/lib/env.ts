@@ -13,7 +13,6 @@ export const envSchema = z.object({
   PINECONE_INDEX: z.string().min(1).optional(),
   AWS_S3_BUCKET_NAME: z.string().min(1).optional(),
   BETTER_AUTH_SECRET: z.string().min(1).optional(),
-  FIRECRAWL_API_KEY: z.string().min(1).optional(),
   TAVILY_API_KEY: z.string().min(1).optional(),
 });
 
@@ -54,6 +53,8 @@ export const VAPI_PUBLIC_KEY = process.env.VAPI_PUBLIC_KEY || '';
 // --- VECTOR STORE (PINECONE) ---
 export const PINECONE_API_KEY = process.env.PINECONE_API_KEY || '';
 export const PINECONE_INDEX = process.env.PINECONE_INDEX || '';
+/** Pinecone index host (e.g. infera-notebook-hrz9ks7.svc.aped-4627-b74a.pinecone.io) */
+export const PINECONE_HOST = process.env.PINECONE_HOST || '';
 
 // --- MEDIA STORAGE (AWS S3 / CLOUDFLARE R2) ---
 export const AWS_REGION = process.env.AWS_REGION || '';
@@ -71,10 +72,8 @@ export const AWS_FORCE_PATH_STYLE =
 // Removed gateway configuration
 
 // --- SEARCH TOOLS & SCRAPERS ---
-/** Tavily search API key for web-aware AI capabilities */
+/** Tavily search API key for web search and URL content extraction */
 export const TAVILY_API_KEY = process.env.TAVILY_API_KEY || '';
-/** Firecrawl API key for scraping websites into markdown */
-export const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY || '';
 
 // --- AUTH ---
 export const BETTER_AUTH_SECRET =
@@ -82,4 +81,3 @@ export const BETTER_AUTH_SECRET =
 export const BETTER_AUTH_URL = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'dummy_client_id';
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'dummy_client_secret';
-export const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_dummy_key';

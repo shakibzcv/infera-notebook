@@ -52,11 +52,19 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
 
   // 2. Calculate timestamps for transcription sync
   const segmentsWithTime = React.useMemo(() => {
-    if (!parsed?.segments) return [];
+    if (!parsed?.segments || !Array.isArray(parsed.segments)) return [];
 
     // If we have a real transcript from Deepgram, use it to align segments
     if (parsed.transcript && parsed.transcript.length > 0) {
-      const words = parsed.transcript;
+      const words = parsed.transcript.filter(
+        (word: any) =>
+          typeof word?.word === 'string' &&
+          word.word.trim().length > 0 &&
+          Number.isFinite(word.start) &&
+          Number.isFinite(word.end) &&
+          word.end >= word.start
+      );
+
       let wordIdx = 0;
       const lastWordEnd = words[words.length - 1]?.end ?? 0;
 
@@ -65,12 +73,10 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
 
         // Accumulate characters from the transcript words until we reach the approximate length of this segment
         let accumulatedChars = 0;
-        // Strip punctuation and spaces to get a rough character count for matching
-        const cleanSegmentText = s.content.replace(/[^\w]/g, '');
+        const cleanSegmentText = String(s.content ?? '').replace(/[^\w]/g, '');
         const targetLen = cleanSegmentText.length;
 
         while (wordIdx < words.length && accumulatedChars < targetLen) {
-          // Add the length of the word (stripping punctuation just in case)
           accumulatedChars += words[wordIdx].word.replace(/[^\w]/g, '').length;
           wordIdx++;
         }
@@ -81,7 +87,7 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
         const end = words[endWordIdx]?.end ?? Math.max(start + 1, lastWordEnd);
 
         return {
-          text: s.content,
+          text: s.content ?? '',
           startSecond: start,
           endSecond: end,
           voice: s.voice,
@@ -89,14 +95,14 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
       });
     }
 
-    // Fallback: Estimate timestamps for older notes
+    // Fallback: Estimate timestamps for older notes or when transcript not present
     let currentSecond = 0;
     const CHARS_PER_SECOND = 15;
 
     return parsed.segments.map((s: any) => {
-      const duration = Math.max(s.content.length / CHARS_PER_SECOND, 1);
+      const duration = Math.max(String(s.content ?? '').length / CHARS_PER_SECOND, 1);
       const segment = {
-        text: s.content,
+        text: s.content ?? '',
         startSecond: currentSecond,
         endSecond: currentSecond + duration,
         voice: s.voice,
@@ -109,7 +115,7 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
   const { getUrl, loading: isResolving, error: resolveError } = useSignedUrls(parsed?.path || '');
   const audioUrl = parsed?.path ? getUrl(parsed.path) : null;
 
-  // 2. Prepare audio files array for the player
+  // 3. Prepare audio files array for the player
   const audioFiles = React.useMemo(() => {
     if (!parsed || !audioUrl) return [];
     return [
@@ -123,7 +129,7 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
     ];
   }, [parsed, audioUrl, note.noteTitle]);
 
-  // 2. Fallback UI if content is missing or unparseable
+  // 4. Fallback UI if content is missing or unparseable
   if (resolveError) {
     return (
       <div className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-xs text-destructive text-center">
@@ -151,7 +157,7 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
     );
   }
 
-  // 3. Render the main view
+  // 5. Render the main view
   return (
     <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden w-full h-full">
       <ScrollArea className="flex-1 w-full h-full">
@@ -162,54 +168,61 @@ export function AudioOverviewNoteView({ note, onInteractiveMode }: Props) {
           </div>
 
           {/* Hosts / Participants Section */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
-            <div className="flex items-center gap-2 text-white/90">
-              <Users className="size-4 text-primary/60" />
-              <h3 className="text-sm font-bold tracking-tight">Hosts</h3>
-            </div>
-            <div className="flex flex-wrap gap-6">
-              {parsed.participants.map((participant: any, idx: number) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
-                    {participant.name.charAt(0)}
+          {parsed.participants && parsed.participants.length > 0 && (
+            <div className="space-y-4 pt-4 border-t border-white/5">
+              <div className="flex items-center gap-2 text-white/90">
+                <Users className="size-4 text-primary/60" />
+                <h3 className="text-sm font-bold tracking-tight">Hosts</h3>
+              </div>
+              <div className="flex flex-wrap gap-6">
+                {parsed.participants.map((participant: any, idx: number) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                      {participant.name?.charAt(0) || 'H'}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-white/90">{participant.name}</span>
+                      <span className="text-[10px] text-white/40 capitalize tracking-wide font-bold">
+                        {participant.specialization || participant.description || 'Host'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-white/90">{participant.name}</span>
-                    <span className="text-[10px] text-white/40 capitalize tracking-wide font-bold">
-                      {participant.specialization || participant.description || 'Host'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Script Section with Sync */}
-          <div className="space-y-6 pt-4 border-t border-white/5">
-            <Transcription
-              segments={segmentsWithTime}
-              currentTime={currentTime}
-              className="flex flex-col gap-6"
-            >
-              {(segment, idx) => {
-                const speaker = parsed.participants.find(
-                  (p: any) => p.voice === (segment as any).voice
-                );
-                const speakerName = speaker?.name || 'Speaker';
+          {segmentsWithTime && segmentsWithTime.length > 0 && (
+            <div className="space-y-6 pt-4 border-t border-white/5">
+              <Transcription
+                segments={segmentsWithTime}
+                currentTime={currentTime}
+                className="flex flex-col gap-6"
+              >
+                {(segment, idx) => {
+                  const speaker =
+                    parsed.participants?.find(
+                      (p: any) => p.voice === (segment as any).voice
+                    ) || parsed.participants?.[idx % (parsed.participants?.length || 1)];
+                  const speakerName = speaker?.name || `Speaker ${idx + 1}`;
 
-                return (
-                  <div key={idx} className="group relative leading-relaxed">
-                    <span className="text-base font-bold text-primary/80 mr-2">{speakerName}:</span>
-                    <TranscriptionSegment
-                      segment={segment}
-                      index={idx}
-                      className="text-base transition-all duration-500 inline"
-                    />
-                  </div>
-                );
-              }}
-            </Transcription>
-          </div>
+                  return (
+                    <div key={idx} className="group relative leading-relaxed">
+                      <span className="text-base font-bold text-primary/80 mr-2">
+                        {speakerName}:
+                      </span>
+                      <TranscriptionSegment
+                        segment={segment}
+                        index={idx}
+                        className="text-base transition-all duration-500 inline"
+                      />
+                    </div>
+                  );
+                }}
+              </Transcription>
+            </div>
+          )}
         </div>
       </ScrollArea>
 

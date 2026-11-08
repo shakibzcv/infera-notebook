@@ -1,4 +1,4 @@
-import { initializeVectorStore } from '@/lib/pinecone';
+import { searchDocuments } from '@/lib/pinecone';
 import { ToolContext, InferaTool } from '@/types/ai';
 import { z } from 'zod';
 
@@ -23,15 +23,29 @@ export function createTools(context: ToolContext): Record<string, InferaTool> {
         ),
     }),
     execute: async ({ query }) => {
-      const vs = await initializeVectorStore();
-      const filter: any = { userId: context.userId, notebookId: context.notebookId };
-      if (context.sourceIds?.length) filter.sourceId = { $in: context.sourceIds };
-      const results = await vs!.similaritySearch(query, 25, filter);
+      const filter: Record<string, any> = {
+        userId: { $eq: context.userId },
+        notebookId: { $eq: context.notebookId },
+      };
+      if (context.sourceIds?.length) {
+        filter.sourceId = { $in: context.sourceIds };
+      }
+
+      const results = await searchDocuments('', query, 25, filter);
+
       return {
         success: true,
         results: results.map((d) => ({
-          content: d.pageContent,
-          metadata: d.metadata,
+          content: d.chunk_text,
+          metadata: {
+            sourceId: d.sourceId,
+            notebookId: d.notebookId,
+            userId: d.userId,
+            chunkIndex: d.chunkIndex,
+            fileType: d.fileType,
+            title: d.title,
+            score: d._score,
+          },
         })),
       };
     },

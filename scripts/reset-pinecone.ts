@@ -6,7 +6,8 @@ dotenv.config();
 
 /**
  * Pinecone Database Reset Script
- * Deletes all vectors and namespaces from the configured Pinecone index to return it to a clean slate.
+ * Deletes all documents/vectors and namespaces from the configured Pinecone index to return it to a clean slate.
+ * Supports both Document Schema indexes (API 2026-07) and legacy Vector indexes.
  */
 async function resetPinecone() {
   const apiKey = process.env.PINECONE_API_KEY;
@@ -27,24 +28,61 @@ async function resetPinecone() {
     const pc = new Pinecone({ apiKey });
     const index = pc.Index(indexName);
 
-    // 1. Inspect current index statistics
+    // 1. Resolve index host
+    let host = process.env.PINECONE_HOST;
+    if (!host) {
+      console.log('Resolving host from Pinecone control plane...');
+      const indexDescription = await pc.describeIndex(indexName);
+      host = indexDescription.host;
+    }
+    const cleanHost = host.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    console.log(`Index Host: ${cleanHost}`);
+
+    // 2. Inspect current index statistics
     console.log(`Fetching statistics for index "${indexName}"...`);
     const stats = await index.describeIndexStats();
-    console.log(`Total Vector Count: ${stats.totalRecordCount ?? 0}`);
+    console.log(`Total Record Count: ${stats.totalRecordCount ?? 0}`);
     console.log(`Index Dimension: ${stats.dimension ?? 'N/A'}`);
 
     if (stats.namespaces && Object.keys(stats.namespaces).length > 0) {
       console.log(`Found namespaces: ${Object.keys(stats.namespaces).join(', ')}`);
       for (const [ns, nsInfo] of Object.entries(stats.namespaces)) {
-        console.log(`Clearing namespace "${ns}" (${nsInfo.recordCount ?? 0} vectors)...`);
+        console.log(`Clearing namespace "${ns}" (${nsInfo.recordCount ?? 0} records)...`);
+        
+        let cleared = false;
+
+        // Try Documents API (2026-07) first for document-schema indices
         try {
-          await index.namespace(ns).deleteAll();
-          console.log(`✅ Cleared namespace "${ns}"`);
-        } catch (e: any) {
-          if (e?.name === 'PineconeNotFoundError' || e?.status === 404) {
-            console.log(`ℹ️ Namespace "${ns}" was already empty.`);
-          } else {
-            throw e;
+          const docDeleteUrl = `https://${cleanHost}/namespaces/${encodeURIComponent(ns)}/documents/delete`;
+          const response = await fetch(docDeleteUrl, {
+            method: 'POST',
+            headers: {
+              'Api-Key': apiKey,
+              'Content-Type': 'application/json',
+              'X-Pinecone-API-Version': '2026-07',
+            },
+            body: JSON.stringify({ delete_all: true }),
+          });
+
+          if (response.ok || response.status === 202) {
+            console.log(`✅ Cleared namespace "${ns}" via Documents API`);
+            cleared = true;
+          }
+        } catch {
+          // If Documents API is unsupported, fall through to vector deleteAll
+        }
+
+        // Fallback to legacy vectors deleteAll if not cleared via Documents API
+        if (!cleared) {
+          try {
+            await index.namespace(ns).deleteAll();
+            console.log(`✅ Cleared namespace "${ns}" via Vectors API`);
+          } catch (e: any) {
+            if (e?.name === 'PineconeNotFoundError' || e?.status === 404) {
+              console.log(`ℹ️ Namespace "${ns}" was already empty.`);
+            } else {
+              throw e;
+            }
           }
         }
       }

@@ -69,26 +69,22 @@ export async function generateAudioOverview(
 }
 
 async function _generateAudio(segments: any[], participants: any[]) {
-  // Construct a single multi-speaker prompt
-  // Based on Gemini TTS Multi-speaker documentation
-  const names = participants.map((p) => p.name).join(' and ');
-  const conversation = segments
-    .map((s) => {
-      const participant = participants.find((p) => p.voice === s.voice);
-      const name = participant ? participant.name : 'Speaker';
-      return `${name}: ${s.content}`;
-    })
-    .join('\n');
-
-  const prompt = `TTS the following conversation between ${names}:\n\n${conversation}`;
+  const turns = segments.map((s) => {
+    const participant = participants.find((p) => p.voice === s.voice);
+    const name = participant ? participant.name : participants[0]?.name || 'Speaker';
+    return {
+      speaker: name,
+      text: s.content,
+    };
+  });
 
   const result = await generateTTS({
-    text: prompt,
     multiSpeaker: {
       speakers: participants.map((p) => ({
         name: p.name,
         voice: p.voice,
       })),
+      turns,
     },
   });
 

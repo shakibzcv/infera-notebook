@@ -1,6 +1,5 @@
 import { VectorStoreError } from './errors';
-import { initializeVectorStore } from '@/lib/pinecone';
-export { initializeVectorStore };
+import { upsertDocuments } from '@/lib/pinecone';
 import { getSignedDownloadUrl, getObjectText, uploadBuffer } from '@/lib/s3';
 
 import { AllowedSourceType, Status } from '@/generated/prisma/enums';
@@ -79,7 +78,9 @@ export async function convertVectorsToChunks(
 }
 
 /**
- * Saves document chunks to Pinecone with rich metadata for filtering.
+ * Saves document chunks to Pinecone using the Documents API (2026-07).
+ * Pinecone auto-embeds the `chunk_text` field using the integrated NVIDIA model —
+ * no external embedding calls needed.
  */
 export async function saveToVectorStore(
   chunks: Document[],
@@ -98,26 +99,19 @@ export async function saveToVectorStore(
   }
 ) {
   try {
-    const vectorStore = await initializeVectorStore();
-    if (!vectorStore) {
-      throw new VectorStoreError('Failed to initialize vector store');
-    }
-
-    const textsWithMetadata = chunks.map((doc, index) => ({
-      ...doc,
-      metadata: {
-        ...doc.metadata,
-        sourceId,
-        userId,
-        notebookId,
-        chunkIndex: index,
-        timestamp: new Date().toISOString(),
-        fileType: sourceType,
-        fileName: sourceTitle || 'unknown',
-      },
+    const documents = chunks.map((doc, index) => ({
+      _id: `${sourceId}-chunk-${index}`,
+      chunk_text: doc.pageContent,
+      title: sourceTitle || 'unknown',
+      sourceId,
+      notebookId,
+      userId,
+      chunkIndex: index,
+      fileType: sourceType,
+      timestamp: new Date().toISOString(),
     }));
 
-    await vectorStore.addDocuments(textsWithMetadata);
+    await upsertDocuments('', documents);
   } catch (error) {
     throw new VectorStoreError(`Failed to save to vector store: ${error}`);
   }

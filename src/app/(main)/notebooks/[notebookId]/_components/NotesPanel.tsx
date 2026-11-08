@@ -624,7 +624,19 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
             </div>
           ) : (
             <ScrollArea className="flex-1 min-h-0">
-              {currentNoteConfig?.beta && (
+              {currentNoteConfig?.comingSoon ? (
+                <div className="mb-6 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">
+                      Coming Soon
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
+                    This feature is currently under active development. You are previewing an early prototype.
+                  </p>
+                </div>
+              ) : currentNoteConfig?.beta ? (
                 <div className="mb-6 p-4 rounded-xl border border-primary/10 bg-primary/5 text-center">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -637,7 +649,7 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                     work on improving the output.
                   </p>
                 </div>
-              )}
+              ) : null}
               {renderSelectedNoteContent(selectedNote)}
             </ScrollArea>
           )}
@@ -653,6 +665,7 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                       !(
                         [
                           AllowedNoteType.EDITABLE_NOTE,
+                          AllowedNoteType.VIDEO_OVERVIEW,
                           AllowedNoteType.FAQ,
                           AllowedNoteType.TIMELINE,
                           AllowedNoteType.BRIEFING_DOC,
@@ -678,17 +691,23 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                       <Button
                         key={config.type}
                         variant="outline"
-                        className="w-full justify-start relative group px-3 py-2 h-auto text-xs"
+                        className="w-full justify-between items-center relative group px-2.5 py-2 h-auto text-xs min-w-0 overflow-hidden"
                         onClick={handleClick}
                         disabled={!hasSelectedSources}
                       >
-                        <Icon className="mr-2 h-4 w-4 shrink-0 transition-colors group-hover:text-primary" />
-                        <span className="truncate flex-1 text-left">{config.label}</span>
-                        {config.beta && (
-                          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-[9px] font-bold text-primary border border-primary/20 tracking-wider shrink-0">
+                        <div className="flex items-center min-w-0 mr-1.5 truncate">
+                          <Icon className="mr-1.5 h-3.5 w-3.5 shrink-0 transition-colors group-hover:text-primary" />
+                          <span className="truncate text-left text-xs">{config.label}</span>
+                        </div>
+                        {config.comingSoon ? (
+                          <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-amber-500/10 text-[8px] font-bold text-amber-400 border border-amber-500/20 tracking-wider whitespace-nowrap leading-none">
+                            COMING SOON
+                          </span>
+                        ) : config.beta ? (
+                          <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-primary/10 text-[8px] font-bold text-primary border border-primary/20 tracking-wider whitespace-nowrap leading-none">
                             BETA
                           </span>
-                        )}
+                        ) : null}
                       </Button>
                     );
                   })}
@@ -697,17 +716,19 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full justify-start relative group px-3 py-2 h-auto text-xs"
+                      className="w-full justify-between items-center relative group px-2.5 py-2 h-auto text-xs min-w-0 overflow-hidden"
                       disabled={!hasSelectedSources}
                     >
-                      <FileText className="mr-2 h-4 w-4 shrink-0 transition-colors group-hover:text-primary" />
-                      <span className="truncate flex-1 text-left">Report</span>
-                      <ChevronDown className="ml-1 h-3.5 w-3.5 opacity-50 shrink-0" />
+                      <div className="flex items-center min-w-0 mr-1.5 truncate">
+                        <FileText className="mr-1.5 h-3.5 w-3.5 shrink-0 transition-colors group-hover:text-primary" />
+                        <span className="truncate text-left text-xs">Report</span>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="w-56 bg-zinc-950 border-white/10 text-white"
+                    className="w-64 max-w-[calc(100vw-2rem)] bg-zinc-950 border-white/10 text-white"
                   >
                     {[
                       noteNodes.find((n) => n.type === AllowedNoteType.FAQ),
@@ -715,15 +736,13 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                       noteNodes.find((n) => n.type === AllowedNoteType.BRIEFING_DOC),
                       noteNodes.find((n) => n.type === AllowedNoteType.SLIDE_DECK),
                       noteNodes.find((n) => n.type === AllowedNoteType.INFOGRAPHIC),
+                      noteNodes.find((n) => n.type === AllowedNoteType.VIDEO_OVERVIEW),
                     ]
                       .filter(Boolean)
                       .map((config) => {
                         if (!config) return null;
                         const Icon = config.icon;
-                        const isDisabled =
-                          Boolean(config.disabled) ||
-                          config.type === AllowedNoteType.SLIDE_DECK ||
-                          config.type === AllowedNoteType.INFOGRAPHIC;
+                        const isDisabled = Boolean(config.disabled);
 
                         const handleClick = isDisabled
                           ? undefined
@@ -735,7 +754,11 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                                 ? createBriefing
                                 : config.type === AllowedNoteType.SLIDE_DECK
                                   ? createSlideDeck
-                                  : createInfographic;
+                                  : config.type === AllowedNoteType.INFOGRAPHIC
+                                    ? createInfographic
+                                    : config.type === AllowedNoteType.VIDEO_OVERVIEW
+                                      ? createVideo
+                                      : undefined;
 
                         return (
                           <DropdownMenuItem
@@ -743,20 +766,26 @@ export function NotesPanel({ className = '', notebookId }: NotesPanelProps) {
                             disabled={isDisabled}
                             onClick={handleClick}
                             className={cn(
-                              'flex items-center gap-2',
+                              'flex items-center justify-between gap-2 px-2.5 py-2 min-w-0',
                               isDisabled
                                 ? 'opacity-50 cursor-not-allowed pointer-events-none'
                                 : 'cursor-pointer hover:bg-white/5 focus:bg-white/5'
                             )}
                           >
-                            <Icon className="h-4 w-4 shrink-0 opacity-70" />
-                            <span className="text-xs flex-1 truncate">{config.label}</span>
-                            {isDisabled ? (
-                              <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[8px] font-medium text-white/50 border border-white/10 tracking-wider">
+                            <div className="flex items-center gap-2 min-w-0 mr-1.5 truncate">
+                              <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                              <span className="text-xs truncate">{config.label}</span>
+                            </div>
+                            {config.comingSoon ? (
+                              <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-amber-500/10 text-[8px] font-bold text-amber-400 border border-amber-500/20 tracking-wider whitespace-nowrap leading-none">
+                                COMING SOON
+                              </span>
+                            ) : isDisabled ? (
+                              <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/10 text-[8px] font-medium text-white/50 border border-white/10 tracking-wider whitespace-nowrap leading-none">
                                 DISABLED
                               </span>
                             ) : config.beta ? (
-                              <span className="px-1 py-0.5 rounded-full bg-primary/10 text-[8px] font-bold text-primary border border-primary/20 tracking-wider">
+                              <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-primary/10 text-[8px] font-bold text-primary border border-primary/20 tracking-wider whitespace-nowrap leading-none">
                                 BETA
                               </span>
                             ) : null}

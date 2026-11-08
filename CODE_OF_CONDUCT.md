@@ -46,7 +46,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project maintainers responsible for enforcement at:
 
-- **Email**: [shakibweg@gmail.com](mailto:shakibweg@gmail.com)
+- **Email**: [shakibzcv@gmail.com](mailto:shakibzcv@gmail.com)
 - **GitHub Issues**: Report a public issue (or contact maintainers directly for private matters)
 
 All complaints will be reviewed and investigated promptly and fairly.
@@ -131,7 +131,7 @@ We are committed to:
 If you have questions or concerns about this Code of Conduct, please:
 
 1. Review the [Contributor Covenant FAQ](https://www.contributor-covenant.org/faq)
-2. Contact project maintainers privately at [shakibweg@gmail.com](mailto:shakibweg@gmail.com)
+2. Contact project maintainers privately at [shakibzcv@gmail.com](mailto:shakibzcv@gmail.com)
 3. Create a private issue on GitHub
 
 ## Contact
@@ -139,8 +139,8 @@ If you have questions or concerns about this Code of Conduct, please:
 For any inquiries, questions, or private reports regarding this Code of Conduct:
 
 - **Maintainer**: Shakib Khan
-- **Email**: [shakibweg@gmail.com](mailto:shakibweg@gmail.com)
-- **GitHub**: [@shakibweg](https://github.com/shakibweg)
+- **Email**: [shakibzcv@gmail.com](mailto:shakibzcv@gmail.com)
+- **GitHub**: [@shakibzcv](https://github.com/shakibzcv)
 
 ## Acknowledgment
 

@@ -112,6 +112,7 @@ export type NoteTypeOption = {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   beta?: boolean;
+  comingSoon?: boolean;
   disabled?: boolean;
 };
 
@@ -130,6 +131,7 @@ export const noteNodes: NoteTypeOption[] = [
     label: 'Video Overview',
     description: 'Create a short video-style overview of the content.',
     icon: Video,
+    comingSoon: true,
   },
   {
     type: AllowedNoteType.MIND_MAP,
@@ -160,16 +162,14 @@ export const noteNodes: NoteTypeOption[] = [
     label: 'Slide Deck',
     description: 'Slide-style summary of the material.',
     icon: Presentation,
-    beta: true,
-    disabled: true,
+    comingSoon: true,
   },
   {
     type: AllowedNoteType.INFOGRAPHIC,
     label: 'Infographic',
     description: 'Visual infographic of key points.',
     icon: BarChart3,
-    beta: true,
-    disabled: true,
+    comingSoon: true,
   },
   {
     type: AllowedNoteType.QUIZ,

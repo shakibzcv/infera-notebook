@@ -3,11 +3,11 @@ import { inngest } from './client';
 import {
   convertVectorsToChunks,
   getDocumentFromSources,
-  initializeVectorStore,
   processSourceToVectors,
   saveToVectorStore,
   updateSourceTable,
 } from './helpers';
+import { deleteDocumentsByFilter } from '@/lib/pinecone';
 import { Status, AllowedNoteType } from '@/generated/prisma/enums';
 import { noteRegistry } from '@/lib/notes/registry';
 import { saveNote } from './helpers';
@@ -79,7 +79,7 @@ export const processSource = inngest.createFunction(
 
       if (!processingVectors || processingVectors.length === 0) {
         throw new NonRetriableError(
-          'Failed to process source: No content could be extracted or the document is empty. Firecrawl might have failed to scrape this URL.'
+          'Failed to process source: No content could be extracted or the document is empty.'
         );
       }
 
@@ -324,10 +324,7 @@ export const deleteSource = inngest.createFunction(
     // 1. Delete Pinecone vectors
     await step.run('delete-pinecone-vectors', async () => {
       try {
-        const vectorStore = await initializeVectorStore();
-        await vectorStore.delete({
-          filter: { sourceId: { $eq: sourceId } },
-        });
+        await deleteDocumentsByFilter('', { sourceId: { $eq: sourceId } });
       } catch (e) {
         console.error(`[Inngest deleteSource] Pinecone cleanup failed for ${sourceId}:`, e);
       }
@@ -411,10 +408,7 @@ export const deleteNotebook = inngest.createFunction(
     // 2. Delete Pinecone vectors for the whole notebook
     await step.run('delete-pinecone-vectors', async () => {
       try {
-        const vectorStore = await initializeVectorStore();
-        await vectorStore.delete({
-          filter: { notebookId: { $eq: notebookId } },
-        });
+        await deleteDocumentsByFilter('', { notebookId: { $eq: notebookId } });
       } catch (e) {
         console.error(`[Inngest deleteNotebook] Pinecone cleanup failed for ${notebookId}:`, e);
       }

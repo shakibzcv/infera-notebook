@@ -42,7 +42,7 @@ flowchart TD
     %% Storage
     subgraph Storage["Persistence & Object Stores"]
         Postgres[("Neon PostgreSQL / Prisma ORM")]
-        Pinecone[("Pinecone Vector Database")]
+        Pinecone[("Pinecone Documents API - 2026-07")]
         BlobStorage[("Cloudflare R2 / AWS S3")]
         TextCache[("S3 Extracted-Text Cache")]
     end
@@ -153,7 +153,7 @@ sequenceDiagram
     Inngest->>Inngest: Split into chunks
     Inngest->>Embed: Generate 768-dimensional vectors
     Embed-->>Inngest: Return embeddings
-    Inngest->>Pinecone: Upsert vectors and metadata
+    Inngest->>Pinecone: Upsert documents and text chunks (Documents API 2026-07)
     Inngest->>Prisma: Update source (SUCCESS)
     Inngest->>SSE: Publish source-status event
     deactivate Inngest
@@ -175,22 +175,27 @@ sequenceDiagram
 | Subtitles (.srt)        | `srt-parser-2`                    | Normalizes timestamps and dialogue blocks      |
 | Audio                   | Deepgram Nova-3 / AssemblyAI      | Speech-to-text and speaker diarization         |
 | Video                   | Audio extraction + Deepgram       | Transcribes audio tracks                       |
-| Websites                | `@mendable/firecrawl-js`          | Extracts Markdown and removes boilerplate      |
+| Websites                | Tavily Extract (`@tavily/core`)   | Extracts Markdown and removes boilerplate      |
 | GitHub repositories     | LangChain GithubLoader            | Ingests source code and Markdown documentation |
 
 ---
 
-## 🧠 Unified AI Model Architecture
+## 🧠 Unified AI Model & Speech Architecture
 
-The AI layer uses a unified model architecture at `src/lib/llm/model-router.ts`.
+The AI layer is structured around specialized Google Gemini models:
 
-1. **Unified Model**: All conversational chat, streaming, reasoning, structured note synthesis, title generation, and transcription use **Gemini 3.5 Flash Lite** (`gemini-3.5-flash-lite`).
-2. **Direct Execution**: Complex fallback model cascades and multi-tier routing have been replaced with direct execution against Gemini 3.5 Flash Lite for consistent behavior and predictable outputs.
+1. **Unified Text & Synthesis Engine**: All conversational chat, streaming, reasoning, structured note synthesis, title generation, and transcription use **Gemini 3.5 Flash Lite** (`gemini-3.5-flash-lite`) for fast, consistent execution and high-fidelity output.
+2. **Multi-Speaker TTS Engine**: Multi-speaker podcast synthesis uses a specialized fallback router (`gemini-2.5-flash-preview-tts` → `gemini-3.1-flash-tts-preview`). The generator structures conversational script turns as discrete content parts with `speech_metadata.speaker` annotations paired with `speechConfig.multiSpeakerVoiceConfig.speakerVoiceConfigs` (e.g., `Puck` and `Charon`), ensuring distinct, realistic studio host voices.
+3. **Batched Embeddings**: Google `gemini-embedding-2` produces 768-dimensional Matryoshka Representation Learning (MRL) embeddings. Ingestion batches calls (up to 96 documents per request) with exponential backoff to respect the 100 RPM limit.
 
 ```mermaid
 flowchart TD
-    Prompt["Incoming task or prompt"] --> Model["Gemini 3.5 Flash Lite (gemini-3.5-flash-lite)"]
+    Prompt["Incoming Text / Chat / Note Task"] --> Model["Gemini 3.5 Flash Lite (gemini-3.5-flash-lite)"]
     Model --> Output["Generated Output (Chat, Structured Notes, Titles, Transcription)"]
+
+    TTSPrompt["Audio Overview Script (Dialogue Turns)"] --> TTSRouter["TTS Model Router (gemini-2.5-flash-preview-tts)"]
+    TTSRouter --> MultiSpeakerTTS["Google Gemini Multi-Speaker Speech Engine"]
+    MultiSpeakerTTS --> AudioOutput["WAV/MP3 Podcast Stream (Puck & Charon)"]
 ```
 
 ---
@@ -217,22 +222,24 @@ flowchart LR
     SSEPub --> ClientUI["Update note viewer"]
 ```
 
-### Note Type Implementations
+### Note Type Implementations & UI Registry
 
-| Note Type        | Handler or Implementation      | Generation Output                                 |
-| ---------------- | ------------------------------ | ------------------------------------------------- |
-| `EDITABLE_NOTE`  | User-created or converted      | BlockNote block JSON                              |
-| `CHAT_NOTE`      | `/api/chat` save action        | Markdown conversation record                      |
-| `AUDIO_OVERVIEW` | `src/lib/notes/audio-overview` | Dialogue script and generated audio               |
-| `VIDEO_OVERVIEW` | `src/lib/notes/video-overview` | Synchronized slides, audio, and Remotion metadata |
-| `MIND_MAP`       | `src/lib/notes/mindmap`        | XYFlow graph specification                        |
-| `FAQ`            | `src/lib/notes/faq`            | Questions, answers, and categories                |
-| `TIMELINE`       | `src/lib/notes/timeline`       | Dates, titles, and descriptions                   |
-| `BRIEFING_DOC`   | `src/lib/notes/briefing`       | Executive summary, findings, and recommendations  |
-| `SLIDE_DECK`     | `src/lib/notes/slide-deck`     | Slides, bullets, and speaker notes                |
-| `INFOGRAPHIC`    | `src/lib/notes/infographic`    | Data sections, metrics, and visual hierarchy      |
-| `QUIZ`           | `src/lib/notes/quiz`           | Questions, options, answers, and explanations     |
-| `FLASH_CARDS`    | `src/lib/notes/flash-cards`    | Front, back, and category fields                  |
+Note creation actions are organized in the workspace into quick-access buttons (Study Guide, Audio Overview, Mind Map) and an extensible **Report** dropdown menu:
+
+| Note Type        | UI Menu Placement         | Handler or Implementation      | Generation Output                                 |
+| ---------------- | ------------------------- | ------------------------------ | ------------------------------------------------- |
+| `EDITABLE_NOTE`  | Top-level / Convert       | User-created or converted      | BlockNote block JSON                              |
+| `CHAT_NOTE`      | Chat action               | `/api/chat` save action        | Markdown conversation record                      |
+| `AUDIO_OVERVIEW` | Quick Action              | `src/lib/notes/audio-overview` | Dialogue script and multi-speaker TTS audio       |
+| `MIND_MAP`       | Quick Action              | `src/lib/notes/mindmap`        | XYFlow graph specification                        |
+| `FAQ`            | Report Menu               | `src/lib/notes/faq`            | Questions, answers, and categories                |
+| `TIMELINE`       | Report Menu               | `src/lib/notes/timeline`       | Dates, titles, and descriptions                   |
+| `BRIEFING_DOC`   | Report Menu               | `src/lib/notes/briefing`       | Executive summary, findings, and recommendations  |
+| `QUIZ`           | Quick Action (Study)      | `src/lib/notes/quiz`           | Questions, options, answers, and explanations     |
+| `FLASH_CARDS`    | Quick Action (Study)      | `src/lib/notes/flash-cards`    | Front, back, and category fields                  |
+| `SLIDE_DECK`     | Report Menu *(Coming Soon)* | `src/lib/notes/slide-deck`   | Slides, bullets, and speaker notes                |
+| `INFOGRAPHIC`    | Report Menu *(Coming Soon)* | `src/lib/notes/infographic`  | Data sections, metrics, and visual hierarchy      |
+| `VIDEO_OVERVIEW` | Report Menu *(Coming Soon)* | `src/lib/notes/video-overview` | Synchronized slides, audio, and Remotion metadata |
 
 ---
 
@@ -315,9 +322,12 @@ sequenceDiagram
    - Core entities include `User`, `Session`, `Account`, `Verification`, `Notebook`, `Source`, `File`, `Note`, `Chat`, and `Message`.
    - Foreign-key cascades support deletion of related sources, notes, and messages.
 
-2. **Vector store (Pinecone)**
-   - Serverless vector index with 768 dimensions and cosine distance.
-   - Metadata filtering isolates notebooks and users.
+2. **Vector store (Pinecone Documents API `2026-07`)**
+   - High-performance serverless document index with 768 dimensions and integrated text storage.
+   - Built on Pinecone's native Documents REST API (`X-Pinecone-API-Version: 2026-07`), eliminating heavy vector-store wrappers.
+   - Flat document schema (`_id`, `chunk_text`, `title`, and notebook/source metadata) storing chunk text directly in the index.
+   - Namespace normalization (`normalizeNamespace()` mapping empty namespace to `'default'`).
+   - Integrated semantic scoring (`score_by: [{ type: 'embed', field: 'chunk_text', query }]`) and filtered batch deletion.
 
 3. **Object storage (Cloudflare R2 / AWS S3)**
    - Stores uploaded files, cached extracted text, and generated audio/video.

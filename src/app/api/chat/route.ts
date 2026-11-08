@@ -3,7 +3,6 @@
  * Orchestrates the RAG (Retrieval-Augmented Generation) chat experience.
  * Handles user message persistence, credit management, and AI streaming.
  */
-import { initializeVectorStore } from '@/inngest/helpers';
 import { streamText, googleConfig, generateChatTitle } from '@/lib/llm';
 import { getCurrentUser } from '@/lib/user';
 import { NextResponse } from 'next/server';

@@ -41,7 +41,7 @@ Upload and index virtually any knowledge format:
 - **Documents**: PDF (`.pdf`), Word (`.docx`), PowerPoint (`.pptx`), EPUB (`.epub`), Plain Text (`.txt`)
 - **Structured Data**: CSV (`.csv`), JSON (`.json`), JSON Lines (`.jsonl`)
 - **Audio & Video**: MP3 (`.mp3`), M4A (`.m4a`), MP4 (`.mp4`), WebM (`.webm`) with automatic speech-to-text transcription via Deepgram and AssemblyAI
-- **Web & Code**: Web URLs (via Firecrawl scraping), YouTube videos (automated transcript extraction), GitHub repositories
+- **Web & Code**: Web URLs (via Tavily Extract), YouTube videos (automated transcript extraction), GitHub repositories
 - **Subtitles**: SubRip subtitle files (`.srt`)
 
 ### 🧠 Dynamic AI Model Router & Multi-Tier Fallback
@@ -51,8 +51,8 @@ An intelligent, bounded syntax-based task classifier that dynamically directs pr
 - **Flagship Reasoning**: Gemini 3.8 Flash & Gemini 3.6 Flash for deep synthesis, complex analysis, and structured outputs
 - **High-Throughput Chat**: Gemini 3.5 Flash-Lite & Gemini 3.1 Flash-Lite (up to 500 RPD) for responsive streaming conversations
 - **Quota Workhorses**: Gemma 4 (26B & 31B) for high-frequency operations like title generation (14,400 RPD)
-- **Multi-Speaker TTS**: Gemini 3.8 Flash TTS, Gemini 3.8 Flash-Lite TTS, and Gemini 3.1 Flash TTS
-- **Multimodal Vector Embeddings**: Google `gemini-embedding-2` with 768-dimensional Matryoshka Representation Learning (MRL)
+- **Multi-Speaker TTS**: Gemini 2.5 Flash Preview TTS and Gemini 3.1 Flash TTS Preview with structured multi-speaker dialogue turns and voice configs
+- **Multimodal Vector Embeddings**: Google `gemini-embedding-2` with 768-dimensional Matryoshka Representation Learning (MRL), batched with rate-limit backoff
 
 ### 🎙️ Real-Time Voice Agent & Gemini Live API
 
@@ -69,20 +69,20 @@ Generate studio-grade summaries, study materials, and interactive media from you
 | ---------------------- | ------------------------------------------------------------------------------------- | --------------------------------------- |
 | **📄 Editable Notes**  | Full-featured block-based rich text editor with markdown import/export                | [BlockNote](https://www.blocknote.dev/) |
 | **💬 Chat Notes**      | Saved conversations and insights directly captured from chat sessions                 | AI Markdown                             |
-| **🎙️ Audio Overviews** | Multi-speaker, studio-quality podcast conversations with customizable character hosts | Gemini TTS / Deepgram                   |
-| **🎬 Video Overviews** | Synchronized video recaps with animated slides, transcript, and audio narration       | [Remotion](https://www.remotion.dev/)   |
+| **🎙️ Audio Overviews** | Multi-speaker, studio-quality podcast conversations with customizable character hosts | Gemini Multi-Speaker TTS / Deepgram     |
 | **🗺️ Mind Maps**       | Interactive node graphs visually mapping concepts and relationships                   | [@xyflow/react](https://reactflow.dev/) |
 | **❓ FAQs**            | Auto-generated question-and-answer pairs synthesizing core themes                     | Structured JSON                         |
 | **📅 Timelines**       | Chronological ordering of historical, project, or conceptual milestones               | Structured JSON                         |
 | **📊 Briefing Docs**   | Executive-ready research summaries, key findings, and decision briefs                 | Structured JSON                         |
-| **📽️ Slide Decks**     | Presentation decks complete with titles, structured bullets, and presenter notes      | Structured JSON                         |
-| **📈 Infographics**    | Visually categorized statistical, thematic, and hierarchical data cards               | Structured JSON                         |
 | **🧠 Quizzes**         | Interactive knowledge assessments with instant scoring and explanations               | Structured JSON                         |
 | **🎴 Flash Cards**     | Interactive double-sided study cards for active recall and spaced repetition          | Structured JSON                         |
+| **📽️ Slide Decks**     | Presentation decks complete with titles, bullets, and speaker notes *(Coming Soon)*   | Structured JSON                         |
+| **📈 Infographics**    | Visually categorized statistical, thematic, and hierarchical cards *(Coming Soon)*    | Structured JSON                         |
+| **🎬 Video Overviews** | Synchronized video recaps with animated slides and audio *(Coming Soon)*              | [Remotion](https://www.remotion.dev/)   |
 
 ### 🔍 Production-Grade RAG Architecture
 
-- **Semantic Vector Memory**: High-dimensional vector search powered by Pinecone with notebook-level metadata isolation
+- **Native Pinecone Documents API**: High-dimensional vector search powered by Pinecone's native Documents API (`2026-07`) with flat document chunks, integrated text storage, and namespace-level metadata isolation
 - **Extracted Text Caching**: Extracted source text is cached directly in S3/R2 storage (`extracted-text/{sourceId}.txt`) to eliminate re-scraping penalties and enable instant note generation
 - **Grounded Citations**: Real-time streaming chat with inline source references and clickable context expansion
 - **Event-Driven Background Workers**: Asynchronous processing with Inngest and Server-Sent Events (SSE) for instantaneous UI status updates
@@ -103,17 +103,17 @@ Generate studio-grade summaries, study materials, and interactive media from you
 
 - **[PostgreSQL](https://www.postgresql.org/)** (Neon Serverless PostgreSQL)
 - **[Prisma 7.2](https://www.prisma.io/)** with `@prisma/adapter-pg`
-- **[Better Auth](https://better-auth.com/)** (Session management, Google OAuth, email verification)
+- **[Better Auth](https://better-auth.com/)** (Session management and Google OAuth)
 
 ### AI, Speech & Search
 
-- **[Google Gemini](https://ai.google.dev/)** (Gemini 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash-Lite, 2.5 Flash, Gemma 4)
+- **[Google Gemini](https://ai.google.dev/)** (Gemini 3.5 Flash-Lite, Gemini 2.5 Flash Preview TTS, Gemini 3.1 Flash TTS Preview)
 - **[Google Embeddings](https://ai.google.dev/)** (`gemini-embedding-2` 768-dim MRL)
 - **[Deepgram](https://www.deepgram.com/)** (Flux ASR, Nova-3 STT, Aura-2 TTS)
 - **[AssemblyAI](https://www.assemblyai.com/)** (Audio intelligence and transcription)
-- **[Pinecone](https://www.pinecone.io/)** (Serverless vector database)
-- **[LangChain](https://www.langchain.com/)** (Document splitters and vector indexing)
-- **[Firecrawl](https://www.firecrawl.dev/)** & **[Tavily](https://tavily.com/)** (Web scraping and real-time search)
+- **[Pinecone](https://www.pinecone.io/)** (Serverless vector database with native Documents API `2026-07`)
+- **[LangChain](https://www.langchain.com/)** (Document splitters and text parsers)
+- **[Tavily](https://tavily.com/)** (Web scraping, URL content extraction, and real-time AI search)
 
 ### Media, Workflow & UI
 
@@ -238,12 +238,12 @@ DEEPGRAM_API_KEY=your_deepgram_api_key
 ASSEMBLY_API_KEY=your_assembly_api_key
 
 # --- DATA SOURCES & AI SEARCH ---
-FIRECRAWL_API_KEY=your_firecrawl_api_key
 TAVILY_API_KEY=your_tavily_api_key
 
 # --- VECTOR DATABASE (Pinecone) ---
 PINECONE_API_KEY=your_pinecone_api_key
 PINECONE_INDEX=infera-notebook
+PINECONE_HOST=your-pinecone-host.pinecone.io
 
 # --- OBJECT STORAGE (Cloudflare R2 / AWS S3) ---
 AWS_REGION=auto
@@ -252,8 +252,6 @@ AWS_ACCESS_KEY_ID=your_r2_access_key_id
 AWS_SECRET_ACCESS_KEY=your_r2_secret_access_key
 AWS_S3_BUCKET_NAME=infera-notebook
 
-# --- UTILITIES ---
-RESEND_API_KEY=your_resend_api_key
 ```
 
 ### Installation & Database Setup
@@ -261,7 +259,7 @@ RESEND_API_KEY=your_resend_api_key
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/shakibweg/infera-notebook.git
+   git clone https://github.com/shakibzcv/infera-notebook.git
    cd infera-notebook
    ```
 
@@ -319,7 +317,7 @@ RESEND_API_KEY=your_resend_api_key
 | `pnpm run db:reset`        | Reset the database and re-apply all migrations                     |
 | `pnpm run bucket:setup`    | Create S3/R2 bucket and apply CORS configuration                   |
 | `pnpm run bucket:teardown` | Delete S3/R2 bucket and clean up storage assets                    |
-| `pnpm run pinecone:reset`  | Wipe all vectors and namespaces from the configured Pinecone index |
+| `pnpm run pinecone:reset`  | Wipe all documents and namespaces from the configured Pinecone index using Documents API |
 
 ---
 
@@ -345,14 +343,14 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
 
 **Shakib Khan**
 
-- GitHub: [@shakibweg](https://github.com/shakibweg)
-- Email: [shakibweg@gmail.com](mailto:shakibweg@gmail.com)
+- GitHub: [@shakibzcv](https://github.com/shakibzcv)
+- Email: [shakibzcv@gmail.com](mailto:shakibzcv@gmail.com)
 
 ---
 
 <div align="center">
 
-Made with ❤️ by [shakibweg](https://github.com/shakibweg)
+Made with ❤️ by [shakibzcv](https://github.com/shakibzcv)
 
 ⭐ If you find this project valuable, please consider starring the repository!
 

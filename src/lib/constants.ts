@@ -11,7 +11,8 @@ export const DEFAULT_MODEL_ID = 'gemini-3.5-flash-lite';
 
 // --- Vector Store Processing ---
 // Defines limits for batch operations in Pinecone/Embeddings to avoid API limits.
-export const GEMINI_EMBEDDING_BATCH_SIZE = 10;
+// Using 20 chunks per single batchEmbedContents request keeps us well below limits.
+export const GEMINI_EMBEDDING_BATCH_SIZE = 20;
 
 // --- User Credit System ---
 // Configuration for the daily usage limits and per-action costs.

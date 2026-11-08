@@ -2,48 +2,11 @@
 
 import { authClient } from '@/lib/auth-client';
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function SignUp() {
-  const router = useRouter();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isSent, setIsSent] = useState(false);
-
-  /**
-   * Preserved Email sign-up handler in codebase for future re-enabling.
-   */
-  const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await authClient.signUp.email({
-        email,
-        password,
-        name: `${firstName} ${lastName}`.trim(),
-        callbackURL: '/sign-in',
-      });
-
-      if (error) {
-        toast.error(error.message || 'Failed to create account');
-        return;
-      }
-
-      setIsSent(true);
-      toast.success('Account created! Please check your email.');
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   /**
    * Primary Social sign-up handler (Google OAuth).
@@ -79,7 +42,7 @@ export default function SignUp() {
         <button
           type="button"
           onClick={handleGoogleSignUp}
-          disabled={isGoogleLoading || isLoading}
+          disabled={isGoogleLoading}
           className="flex w-full items-center justify-center gap-3 h-[48px] rounded-[8px] bg-white hover:bg-[#faf8f5] active:bg-[#f2efe9] text-[#1b1f3b] font-medium text-[15px] tracking-[-0.01em] shadow-[0_2px_8px_-2px_rgba(27,31,59,0.12),0_1px_3px_rgba(27,31,59,0.06)] hover:shadow-[0_4px_12px_-2px_rgba(27,31,59,0.18)] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed dark:bg-card dark:text-foreground dark:hover:bg-accent/80 dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5)]"
         >
           {isGoogleLoading ? (

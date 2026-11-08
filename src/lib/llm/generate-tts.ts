@@ -3,10 +3,11 @@ import { GEMINI_API_KEY } from './config';
 import { TTS_ROUTER_MODELS, type TTSRouterModel } from './model-router';
 
 export interface TTSOptions {
-  text: string;
+  text?: string;
   voice?: string;
   multiSpeaker?: {
     speakers: { name: string; voice: string }[];
+    turns?: { speaker: string; text: string }[];
   };
 }
 
@@ -40,67 +41,153 @@ function addWavHeader(pcmBuffer: Buffer, sampleRate: number = 24000): Buffer {
 }
 
 /**
+ * Parses script dialogue text into structured turns for multi-speaker synthesis.
+ */
+function parseTextToTurns(
+  text: string,
+  speakers: { name: string; voice: string }[]
+): { speaker: string; text: string }[] {
+  const speakerNames = speakers.map((s) => s.name);
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const turns: { speaker: string; text: string }[] = [];
+  let currentSpeaker = speakerNames[0] || 'Speaker 1';
+  let currentText = '';
+
+  for (const line of lines) {
+    const match = line.match(/^([^:]+):\s*(.*)$/);
+    if (match) {
+      const potentialName = match[1].trim();
+      const matchedSpeaker = speakerNames.find(
+        (name) => name.toLowerCase() === potentialName.toLowerCase()
+      );
+      if (matchedSpeaker) {
+        if (currentText) {
+          turns.push({ speaker: currentSpeaker, text: currentText });
+          currentText = '';
+        }
+        currentSpeaker = matchedSpeaker;
+        currentText = match[2].trim();
+        continue;
+      }
+    }
+    currentText = currentText ? `${currentText} ${line}` : line;
+  }
+
+  if (currentText) {
+    turns.push({ speaker: currentSpeaker, text: currentText });
+  }
+
+  if (turns.length === 0 && text.trim()) {
+    turns.push({ speaker: currentSpeaker, text: text.trim() });
+  }
+
+  return turns;
+}
+
+/**
  * Gemini Text-to-Speech (TTS) Generation with Model Router Fallback
- * Cascades across TTS_ROUTER_MODELS (gemini-3.8-flash-tts -> gemini-3.8-flash-lite-tts -> gemini-3.1-flash-tts-preview -> gemini-2.5-flash-preview-tts)
- * to maximize rate limits and prevent 429/500 generation failures.
+ * Cascades across TTS_ROUTER_MODELS to maximize rate limits and handle multi-speaker dialogues.
  */
 export async function generateTTS(options: TTSOptions): Promise<TTSResult> {
-  const { text, voice = 'Zephyr', multiSpeaker } = options;
+  const { text = '', voice = 'Zephyr', multiSpeaker } = options;
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-  const model = TTS_ROUTER_MODELS[0];
-  try {
-    console.log(`[TTS] Generating audio with model: "${model}"`);
 
-    const config: any = {
-      responseModalities: ['AUDIO'],
+  const isMulti = Boolean(multiSpeaker && multiSpeaker.speakers && multiSpeaker.speakers.length > 0);
+
+  let parts: any[] = [];
+  const config: any = {
+    responseModalities: ['AUDIO'],
+  };
+
+  if (isMulti && multiSpeaker) {
+    const speakers = multiSpeaker.speakers;
+    const speakerNames = new Set(speakers.map((s) => s.name));
+
+    // Resolve turns (either provided directly or parsed from text)
+    let turns = multiSpeaker.turns;
+    if (!turns || turns.length === 0) {
+      turns = parseTextToTurns(text, speakers);
+    }
+
+    // Ensure every turn specifies speech_metadata.speaker matching a configured speaker
+    parts = turns
+      .filter((t) => t.text && t.text.trim().length > 0)
+      .map((t) => {
+        const validSpeaker = speakerNames.has(t.speaker) ? t.speaker : speakers[0].name;
+        return {
+          text: t.text.trim(),
+          speech_metadata: { speaker: validSpeaker },
+        };
+      });
+
+    // In case no turns were found, provide fallback part
+    if (parts.length === 0) {
+      parts = [
+        {
+          text: text.trim() || 'Hello',
+          speech_metadata: { speaker: speakers[0].name },
+        },
+      ];
+    }
+
+    config.speechConfig = {
+      multiSpeakerVoiceConfig: {
+        speakerVoiceConfigs: speakers.map((s) => ({
+          speaker: s.name,
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: s.voice },
+          },
+        })),
+      },
     };
-
-    if (multiSpeaker && multiSpeaker.speakers.length > 0) {
-      config.speechConfig = {
-        multiSpeakerVoiceConfig: {
-          speakerVoiceConfigs: multiSpeaker.speakers.map((s) => ({
-            speaker: s.name,
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: s.voice },
-            },
-          })),
-        },
-      };
-    } else {
-      config.speechConfig = {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: voice },
-        },
-      };
-    }
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text }] }],
-      config,
-    });
-
-    const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-
-    if (!data) {
-      const finishReason = response.candidates?.[0]?.finishReason;
-      if (finishReason === 'SAFETY') {
-        throw new Error(`TTS generation blocked by safety filters.`);
-      }
-      throw new Error(`No audio data returned from model "${model}".`);
-    }
-
-    const pcmBuffer = Buffer.from(data, 'base64');
-    const wavBuffer = addWavHeader(pcmBuffer);
-
-    console.log(`[TTS] Successfully generated audio using model: "${model}"`);
-    return { success: true, buffer: wavBuffer, modelUsed: model };
-  } catch (error: any) {
-    const msg = error?.message || String(error);
-    console.error(`[TTS] Model "${model}" failed: ${msg}`);
-    return {
-      success: false,
-      error: msg,
+  } else {
+    parts = [{ text: text.trim() }];
+    config.speechConfig = {
+      voiceConfig: {
+        prebuiltVoiceConfig: { voiceName: voice },
+      },
     };
   }
+
+  let lastError = 'No models available';
+
+  for (const model of TTS_ROUTER_MODELS) {
+    try {
+      console.log(`[TTS] Generating audio with model: "${model}" (multiSpeaker: ${isMulti})`);
+
+      const response = await ai.models.generateContent({
+        model,
+        contents: [{ parts }],
+        config,
+      });
+
+      const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+      if (!data) {
+        const finishReason = response.candidates?.[0]?.finishReason;
+        if (finishReason === 'SAFETY') {
+          throw new Error('TTS generation blocked by safety filters.');
+        }
+        throw new Error(`No audio data returned from model "${model}".`);
+      }
+
+      const pcmBuffer = Buffer.from(data, 'base64');
+      const wavBuffer = addWavHeader(pcmBuffer);
+
+      console.log(`[TTS] Successfully generated audio using model: "${model}"`);
+      return { success: true, buffer: wavBuffer, modelUsed: model };
+    } catch (error: any) {
+      lastError = error?.message || String(error);
+      console.warn(`[TTS] Model "${model}" failed, falling back if available:`, lastError);
+    }
+  }
+
+  console.error('[TTS] All router models exhausted:', lastError);
+  return {
+    success: false,
+    error: lastError,
+  };
 }

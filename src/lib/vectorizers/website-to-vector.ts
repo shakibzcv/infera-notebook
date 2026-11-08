@@ -1,36 +1,68 @@
-import Firecrawl from '@mendable/firecrawl-js';
-import { FIRECRAWL_API_KEY } from '@/lib/env';
+import { tavily } from '@tavily/core';
+import { TAVILY_API_KEY } from '@/lib/env';
 import type { Document } from '@langchain/core/documents';
+
+function extractTitle(markdown: string, url: string): string {
+  // Check for the first markdown heading (# Heading)
+  const h1Match = markdown.match(/^#\s+(.+)$/m);
+  if (h1Match && h1Match[1].trim()) {
+    return h1Match[1].trim();
+  }
+
+  // Fallback to URL path segment or hostname
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/\/+$/, '');
+    if (pathname && pathname !== '/') {
+      const segment = pathname.split('/').pop();
+      if (segment) {
+        return decodeURIComponent(segment.replace(/[-_]/g, ' '));
+      }
+    }
+    return parsed.hostname;
+  } catch {
+    return url;
+  }
+}
 
 export async function websiteToVector(url: string): Promise<Document[]> {
   try {
-    const firecrawl = new Firecrawl({
-      apiKey: FIRECRAWL_API_KEY,
-    });
-
-    // Use scrapeUrl (v0/v1) as per our successful test
-    const result = await (firecrawl as any).scrapeUrl(url, {
-      formats: ['markdown'],
-    });
-
-    if (!result.success) {
-      throw new Error(result.error || 'Firecrawl failed to scrape the URL');
+    if (!TAVILY_API_KEY) {
+      throw new Error('TAVILY_API_KEY is not configured');
     }
 
-    const data = result.data;
+    const client = tavily({
+      apiKey: TAVILY_API_KEY,
+    });
 
-    if (!data || !data.markdown) {
+    const response = await client.extract([url], {
+      format: 'markdown',
+      includeFavicon: true,
+    });
+
+    if (
+      response.failedResults &&
+      response.failedResults.length > 0 &&
+      (!response.results || response.results.length === 0)
+    ) {
+      throw new Error(response.failedResults[0].error || 'Tavily failed to extract URL');
+    }
+
+    const item = response.results?.[0];
+    if (!item || !item.rawContent) {
       return [];
     }
 
+    const title = extractTitle(item.rawContent, url);
+
     return [
       {
-        pageContent: data.markdown,
+        pageContent: item.rawContent,
         metadata: {
-          title: data.metadata?.title || '',
-          description: data.metadata?.description || '',
+          title,
           source: url,
-          ...data.metadata,
+          favicon: item.favicon || '',
+          images: item.images || [],
         },
       },
     ];

@@ -49,7 +49,7 @@ Before you begin, ensure you have:
 3. **Add the upstream repository**
 
    ```bash
-   git remote add upstream https://github.com/shakibweg/infera-notebook.git
+   git remote add upstream https://github.com/shakibzcv/infera-notebook.git
    ```
 
 4. **Install dependencies**
@@ -62,11 +62,11 @@ Before you begin, ensure you have:
 
    ```bash
    cp .env.example .env
-   # Edit .env with your database, AI API keys, Pinecone, and S3 credentials
+   # Edit .env with your database, AI API keys, Pinecone (PINECONE_API_KEY, PINECONE_INDEX, PINECONE_HOST), and S3 credentials
    ```
 
    > [!NOTE]
-   > Operational scripts (`scripts/setup-bucket.ts`, `scripts/reset-pinecone.ts`) and Prisma load configuration directly from `.env`.
+   > Operational scripts (`scripts/setup-bucket.ts`, `scripts/reset-pinecone.ts`) and Prisma load configuration directly from `.env`. The Pinecone reset utility automatically targets the native Documents API.
 
 6. **Set up the database**
 
@@ -416,7 +416,7 @@ Any other context, mockups, or examples.
 If you have questions:
 
 1. Check the [README](README.md) for documentation
-2. Search existing [Issues](https://github.com/shakibweg/infera-notebook/issues)
+2. Search existing [Issues](https://github.com/shakibzcv/infera-notebook/issues)
 3. Create a new issue with the `question` label
 4. Be patient - maintainers are volunteers
 
@@ -425,9 +425,9 @@ If you have questions:
 If you have questions, feedback, or need to reach out to the project maintainers directly:
 
 - **Maintainer**: Shakib Khan
-- **Email**: [shakibweg@gmail.com](mailto:shakibweg@gmail.com)
-- **GitHub**: [@shakibweg](https://github.com/shakibweg)
-- **Issues**: [GitHub Issues](https://github.com/shakibweg/infera-notebook/issues)
+- **Email**: [shakibzcv@gmail.com](mailto:shakibzcv@gmail.com)
+- **GitHub**: [@shakibzcv](https://github.com/shakibzcv)
+- **Issues**: [GitHub Issues](https://github.com/shakibzcv/infera-notebook/issues)
 
 ## Recognition
 
